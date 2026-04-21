@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     # App
     secret_key: str = "your-secret-key-change-in-production"
     environment: str = "development"
+    allowed_origins: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://frontend-sepia-three-46.vercel.app",
+        "https://leagle.qzz.io"
+    ]
     
     class Config:
         env_file = str(Path(__file__).parent.parent.parent / ".env")

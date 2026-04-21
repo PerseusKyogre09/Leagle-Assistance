@@ -13,7 +13,7 @@ Vercel is the natural choice for Next.js. It offers a generous free tier with au
 2.  Import the project into Vercel.
 3.  Set the **Root Directory** to `frontend`.
 4.  Configure **Environment Variables**:
-    *   `NEXT_PUBLIC_API_URL`: The URL of your backend (from Step 2).
+    *   `NEXT_PUBLIC_API_URL`: The URL of your backend (from Step 2). **IMPORTANT**: Must include `https://` prefix (e.g., `https://leagle-backend.hf.space`).
     *   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: From your Clerk Dashboard.
     *   `CLERK_SECRET_KEY`: From your Clerk Dashboard.
 
@@ -36,7 +36,9 @@ Excellent for AI backends. It offers better performance and persistent URLs.
 2.  Select **Docker** as the Space SDK.
 3.  Upload the `backend/` directory content (including the new `Dockerfile`).
 4.  HF will automatically build and expose the API on port 7860.
-5.  **Important**: In the Space **Settings**, add your secrets (`DATABASE_URL`, `GEMINI_API_KEY`, etc.).
+5.  **Important**: In the Space **Settings**, add your secrets:
+    *   `ALLOWED_ORIGINS`: Your Vercel frontend URL (e.g., `https://your-app.vercel.app`).
+    *   `DATABASE_URL`, `GEMINI_API_KEY`, etc.
 
 ---
 
@@ -67,6 +69,12 @@ To make the frontend and backend talk to each other in production:
 1.  Deploy the **Backend** first to get its public URL (e.g., `https://leagle-backend.onrender.com`).
 2.  Add that URL to the Frontend's `NEXT_PUBLIC_API_URL` variable.
 3.  Redeploy the Frontend.
+
+### Troubleshooting HF + Vercel
+1.  **CORS Errors**: Ensure `ALLOWED_ORIGINS` in HF Spaces includes your Vercel URL.
+2.  **Mixed Content**: Ensure `NEXT_PUBLIC_API_URL` starts with `https://`.
+3.  **Port 7860**: HF Spaces expects port 7860. The `Dockerfile` is pre-configured for this.
+4.  **Trailing Slashes**: Some routers are sensitive to trailing slashes. Use `/api/regulations` instead of `/api/regulations/` if you hit 404s.
 
 ### Deployment Cost: $0.00
 This entire stack can run on free tiers for the initial hackathon/demo phase.
