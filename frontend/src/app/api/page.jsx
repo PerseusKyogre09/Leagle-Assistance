@@ -21,11 +21,18 @@ export default function APIPage() {
     const [showKeyModal, setShowKeyModal] = useState(false);
     const [manualKey, setManualKey] = useState('');
     const [useManualKey, setUseManualKey] = useState(false);
-    const [activeSection, setActiveSection] = useState('introduction');
+    const [activeSection, setActiveSection] = useState('docs');
+    const [docSection, setDocSection] = useState('overview');
 
     useEffect(() => {
         fetchKeys();
     }, []);
+
+    const navigateToDoc = (section) => {
+        setActiveSection('docs');
+        setDocSection(section);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const fetchKeys = async () => {
         setIsFetchingKeys(true);
@@ -109,8 +116,18 @@ export default function APIPage() {
                     <section className="space-y-4">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Introduction</h3>
                         <nav className="flex flex-col gap-2">
-                            {['Overview', 'Architecture', 'Quickstart'].map(item => (
-                                <button key={item} className="text-sm font-serif italic text-left hover:text-leagle-accent transition-colors">{item}</button>
+                            {[
+                                { id: 'overview', label: 'Overview' },
+                                { id: 'architecture', label: 'Architecture' },
+                                { id: 'quickstart', label: 'Quickstart' }
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => navigateToDoc(item.id)}
+                                    className={`text-sm font-serif italic text-left transition-all ${activeSection === 'docs' && docSection === item.id ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}
+                                >
+                                    {item.label}
+                                </button>
                             ))}
                         </nav>
                     </section>
@@ -118,8 +135,18 @@ export default function APIPage() {
                     <section className="space-y-4">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Endpoints</h3>
                         <nav className="flex flex-col gap-2">
-                            {['Neural Search', 'Protocol Keys', 'Compliance Audit'].map(item => (
-                                <button key={item} className="text-sm font-serif italic text-left hover:text-leagle-accent transition-colors">{item}</button>
+                            {[
+                                { id: 'neural-search', label: 'Neural Search' },
+                                { id: 'protocol-keys', label: 'Protocol Keys' },
+                                { id: 'compliance-audit', label: 'Compliance Audit' }
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => navigateToDoc(item.id)}
+                                    className={`text-sm font-serif italic text-left transition-all ${activeSection === 'docs' && docSection === item.id ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}
+                                >
+                                    {item.label}
+                                </button>
                             ))}
                         </nav>
                     </section>
@@ -130,7 +157,7 @@ export default function APIPage() {
                         </h3>
                         <nav className="flex flex-col gap-2">
                             <button onClick={() => setActiveSection('console')} className={`text-sm font-serif italic text-left transition-all ${activeSection === 'console' ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}>Developer Console</button>
-                            <button onClick={() => setActiveSection('docs')} className={`text-sm font-serif italic text-left transition-all ${activeSection === 'docs' ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}>API Reference</button>
+                            <button onClick={() => { setActiveSection('docs'); setDocSection('overview'); }} className={`text-sm font-serif italic text-left transition-all ${activeSection === 'docs' ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}>API Reference</button>
                         </nav>
                     </section>
                 </aside>
@@ -139,51 +166,197 @@ export default function APIPage() {
                 <article className="space-y-32">
 
                     {activeSection === 'docs' ? (
-                        <>
-                            {/* DOCUMENTATION SECTION */}
-                            <section id="introduction" className="space-y-8 max-w-3xl">
-                                <header className="space-y-4">
-                                    <div className="flex items-center gap-2 text-leagle-accent">
-                                        <Globe size={16} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Global Protocol V4</span>
-                                    </div>
-                                    <h1 className="text-6xl font-serif italic text-white leading-[0.9] tracking-tighter">API <span className="text-gradient">Redefined</span></h1>
-                                    <p className="text-lg text-gray-400 font-serif italic leading-relaxed">
-                                        The Leagle Neural Interface provides programmatic access to our institutional-grade vector storage and regulatory inference engine.
-                                    </p>
-                                </header>
-
-                                <div className="space-y-12 pt-16 border-t border-white/5">
-                                    <div className="space-y-4">
-                                        <h2 className="text-2xl font-serif italic text-white">Authentication</h2>
-                                        <p className="text-gray-400 leading-relaxed font-serif italic">
-                                            All requests must be authenticated using an <code className="text-indigo-400 bg-indigo-400/10 px-1.5 py-0.5 rounded">X-Protocol-Key</code> header.
-                                            You can manage these credentials in the Developer Console.
+                        <div className="space-y-32">
+                            {docSection === 'overview' && (
+                                <section className="space-y-8 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Globe size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Leagle Intelligence Protocol</span>
+                                        </div>
+                                        <h1 className="text-6xl font-serif italic text-white leading-[0.9] tracking-tighter">API <span className="text-gradient">Redefined</span></h1>
+                                        <p className="text-lg text-gray-400 font-serif italic leading-relaxed">
+                                            The Leagle Neural Interface provides programmatic access to our institutional-grade vector storage and regulatory inference engine.
                                         </p>
-                                        <div className="bg-[#0a0a0a] border border-white/5 p-6 rounded-sm">
-                                            <code className="text-sm font-mono text-gray-500">headers: &#123; "X-Protocol-Key": "LGL_PROTOCOL_..." &#125;</code>
+                                    </header>
+                                    <div className="pt-12 border-t border-white/5 space-y-6">
+                                        <h2 className="text-2xl font-serif italic text-white">The Mission</h2>
+                                        <p className="text-gray-400 font-serif italic leading-relaxed">
+                                            Our protocol is designed to bridge the gap between static regulatory frameworks and dynamic, AI-driven compliance operations. By leveraging a high-fidelity Neural Link, enterprises can automate complex regulatory analysis with millisecond latency.
+                                        </p>
+                                    </div>
+                                </section>
+                            )}
+
+                            {docSection === 'architecture' && (
+                                <section className="space-y-8 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Cpu size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Protocol Architecture</span>
+                                        </div>
+                                        <h1 className="text-5xl font-serif italic text-white leading-tight">Neural <span className="text-gradient">Core</span></h1>
+                                    </header>
+                                    <div className="space-y-12 pt-12 border-t border-white/5">
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-serif italic text-white">RAG-First Execution</h2>
+                                            <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                Unlike general-purpose LLMs, the Leagle Neural Engine operates on a strict RAG (Retrieval-Augmented Generation) foundation. Every inference is grounded in the current multi-jurisdictional compliance database.
+                                            </p>
+                                        </div>
+                                        <div className="p-8 bg-white/[0.02] border border-white/5 rounded-sm">
+                                            <div className="grid grid-cols-3 gap-8 text-center">
+                                                <div className="space-y-2">
+                                                    <div className="text-leagle-accent font-black text-xs">INPUT</div>
+                                                    <div className="text-[10px] text-gray-500 font-mono italic">Semantic Query</div>
+                                                </div>
+                                                <div className="space-y-2 border-x border-white/5">
+                                                    <div className="text-white font-black text-xs">NEURAL LINK</div>
+                                                    <div className="text-[10px] text-gray-500 font-mono italic">Vector Search</div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="text-emerald-400 font-black text-xs">OUTPUT</div>
+                                                    <div className="text-[10px] text-gray-500 font-mono italic">Compliance JSON</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                </section>
+                            )}
 
-                                    <div className="space-y-4">
-                                        <h2 className="text-2xl font-serif italic text-white">Neural Search Engine</h2>
-                                        <p className="text-gray-400 leading-relaxed font-serif italic">
-                                            Perform semantic retrieval across multi-jurisdictional compliance data. Our engine uses RAG (Retrieval Augmented Generation) to ensure high-fidelity citations.
-                                        </p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm">
-                                                <h4 className="text-[10px] font-black uppercase text-gray-500 mb-2">Endpoint</h4>
-                                                <code className="text-leagle-accent font-mono text-sm">GET /api/v1/neural/search</code>
+                            {docSection === 'quickstart' && (
+                                <section className="space-y-12 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Zap size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Getting Started</span>
+                                        </div>
+                                        <h1 className="text-5xl font-serif italic text-white leading-tight">Fast <span className="text-gradient">Integration</span></h1>
+                                    </header>
+                                    <div className="space-y-16 pt-12 border-t border-white/5">
+                                        <div className="space-y-6">
+                                            <div className="flex gap-6">
+                                                <div className="w-8 h-8 rounded-full border border-leagle-accent/30 flex items-center justify-center text-xs font-black text-leagle-accent shrink-0">01</div>
+                                                <div className="space-y-2">
+                                                    <h3 className="text-xl font-serif italic text-white">Generate Protocol Key</h3>
+                                                    <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                        Head to the <button onClick={() => setActiveSection('console')} className="text-leagle-accent underline">Developer Console</button> to issue your first institutional credential.
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm">
-                                                <h4 className="text-[10px] font-black uppercase text-gray-500 mb-2">Query Param</h4>
-                                                <code className="text-white font-mono text-sm">?query=...&limit=5</code>
+                                            <div className="flex gap-6">
+                                                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-xs font-black text-gray-600 shrink-0">02</div>
+                                                <div className="space-y-2">
+                                                    <h3 className="text-xl font-serif italic text-white">Configure Your Request</h3>
+                                                    <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                        Prepare an HTTP GET request to our neural search endpoint using your unique key in the headers.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-6">
+                                                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-xs font-black text-gray-600 shrink-0">03</div>
+                                                <div className="space-y-2">
+                                                    <h3 className="text-xl font-serif italic text-white">Handle Compliance Data</h3>
+                                                    <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                        Our API returns structured JSON data ready to be consumed by your internal compliance dashboard or automated reporting systems.
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </section>
-                        </>
+                                </section>
+                            )}
+
+                            {docSection === 'neural-search' && (
+                                <section className="space-y-8 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Search size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Neural Search API</span>
+                                        </div>
+                                        <h1 className="text-5xl font-serif italic text-white leading-tight">Semantic <span className="text-gradient">Retrieval</span></h1>
+                                    </header>
+                                    <div className="space-y-12 pt-12 border-t border-white/5">
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-serif italic text-white">The Endpoint</h2>
+                                            <div className="p-6 bg-black border border-white/5 rounded-sm flex justify-between items-center group">
+                                                <code className="text-leagle-accent font-mono text-sm leading-none">GET /api/v1/neural/search</code>
+                                                <button onClick={() => handleCopy('https://leagle-xi.vercel.app/api/v1/neural/search')} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Copy size={14} className="text-gray-500 hover:text-white" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-serif italic text-white">Parameters</h2>
+                                            <table className="w-full border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-white/5 text-[10px] font-black text-gray-600 uppercase tracking-widest">
+                                                        <th className="py-4 text-left">Parameter</th>
+                                                        <th className="py-4 text-left">Type</th>
+                                                        <th className="py-4 text-left">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5 text-sm font-serif italic">
+                                                    <tr>
+                                                        <td className="py-4 text-white">query</td>
+                                                        <td className="py-4 text-indigo-400 font-mono text-[10px]">string</td>
+                                                        <td className="py-4 text-gray-500">The semantic query to execute against the neural link.</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="py-4 text-white">limit</td>
+                                                        <td className="py-4 text-indigo-400 font-mono text-[10px]">integer</td>
+                                                        <td className="py-4 text-gray-500">Max results to return. Default: 5.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {docSection === 'protocol-keys' && (
+                                <section className="space-y-8 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Key size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Protocol Keys</span>
+                                        </div>
+                                        <h1 className="text-5xl font-serif italic text-white leading-tight">Key <span className="text-gradient">Management</span></h1>
+                                    </header>
+                                    <div className="space-y-12 pt-12 border-t border-white/5">
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-serif italic text-white">Authentication Flow</h2>
+                                            <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                All requests must include the <code className="text-indigo-400 bg-indigo-400/10 px-1.5 py-0.5 rounded">X-Protocol-Key</code> header. This key identifies your institutional tenancy and grants access to specific regulatory datasets.
+                                            </p>
+                                            <div className="p-8 bg-[#0a0a0a] border border-white/5 rounded-sm">
+                                                <code className="text-xs font-mono text-gray-500">headers: &#123; "X-Protocol-Key": "LGL_PROTOCOL_..." &#125;</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {docSection === 'compliance-audit' && (
+                                <section className="space-y-8 max-w-3xl animate-in fade-in duration-700">
+                                    <header className="space-y-4">
+                                        <div className="flex items-center gap-2 text-leagle-accent">
+                                            <Shield size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Compliance Audit</span>
+                                        </div>
+                                        <h1 className="text-5xl font-serif italic text-white leading-tight">Audit <span className="text-gradient">Protocol</span></h1>
+                                    </header>
+                                    <div className="space-y-12 pt-12 border-t border-white/5">
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-serif italic text-white">Data Sovereignty</h2>
+                                            <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                Every neural request is logged within your immutable audit trail. This ensures a transparent chain of custody for all regulatory decisions made via the Leagle platform.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+                        </div>
                     ) : (
                         /* INTERACTIVE CONSOLE SECTION */
                         <section className="space-y-24">
