@@ -1,12 +1,12 @@
 'use client';
 
 import LandingNavbar from '../components/LandingNavbar';
-import { Terminal, BookOpen, Key, Link as LinkIcon, Database, Shield, Zap, Check, Plus, Copy, RefreshCw, Search, ArrowRight, Play, Trash2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Show, SignInButton } from '@clerk/nextjs';
+import { Terminal, BookOpen, Key, Link as LinkIcon, Shield, Zap, Check, Plus, Copy, RefreshCw, Search, ArrowRight, Play, Trash2, Lock, Code, Cpu, Activity, Globe, Database } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const API_BASE = '/api/v1/neural';
-// For snippets, we want the full public domain
 const PUBLIC_API_BASE = 'https://leagle-xi.vercel.app/api/v1/neural';
 
 export default function APIPage() {
@@ -21,6 +21,7 @@ export default function APIPage() {
     const [showKeyModal, setShowKeyModal] = useState(false);
     const [manualKey, setManualKey] = useState('');
     const [useManualKey, setUseManualKey] = useState(false);
+    const [activeSection, setActiveSection] = useState('introduction');
 
     useEffect(() => {
         fetchKeys();
@@ -63,19 +64,16 @@ export default function APIPage() {
         }
     };
 
-    const handleCopy = (key) => {
-        navigator.clipboard.writeText(key);
-        setCopied(key);
+    const handleCopy = (text) => {
+        navigator.clipboard.writeText(text);
+        setCopied(text);
         setTimeout(() => setCopied(null), 2000);
     };
 
     const activeKey = useManualKey ? manualKey : selectedKey;
 
     const runNeuralTest = async () => {
-        if (!activeKey) {
-            setResults({ error: 'Please provide a valid Protocol Key.' });
-            return;
-        }
+        if (!activeKey) return;
         setIsLoading(true);
         try {
             const response = await axios.get(`${API_BASE}/search?query=${encodeURIComponent(query)}&limit=3`, {
@@ -83,8 +81,7 @@ export default function APIPage() {
             });
             setResults(response.data);
         } catch (error) {
-            console.error('Neural Search Failed:', error);
-            setResults(error.response?.data || { error: 'Failed to connect to Neural Engine.' });
+            setResults(error.response?.data || { error: 'Neutral Link Failure' });
         } finally {
             setIsLoading(false);
         }
@@ -93,337 +90,242 @@ export default function APIPage() {
     const getSnippets = () => {
         const keyToUse = activeKey || 'YOUR_PROTOCOL_KEY';
         const searchUrl = `${PUBLIC_API_BASE}/search?query=${encodeURIComponent(query)}`;
-
         return {
             curl: `curl -H "X-Protocol-Key: ${keyToUse}" "${searchUrl}"`,
             python: `import requests\n\nurl = "${searchUrl}"\nheaders = {"X-Protocol-Key": "${keyToUse}"}\n\nresponse = requests.get(url, headers=headers)\nprint(response.json())`,
-            javascript: `const response = await fetch("${searchUrl}", {\n  headers: {\n    "X-Protocol-Key": "${keyToUse}"\n  }\n});\nconst data = await response.json();\nconsole.log(data);`
+            javascript: `const response = await fetch("${searchUrl}", {\n  headers: { "X-Protocol-Key": "${keyToUse}" }\n});\nconst data = await response.json();\nconsole.log(data);`
         };
     };
 
     return (
-        <div className="min-h-screen bg-[var(--leagle-bg)] text-white">
+        <div className="min-h-screen bg-[#050505] text-gray-300 selection:bg-leagle-accent/30 selection:text-white pb-32">
             <LandingNavbar />
 
-            <main className="pt-40 pb-40 px-6">
-                <div className="max-w-7xl mx-auto">
-                    {/* Hero Section */}
-                    <header className="mb-32 space-y-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-leagle-accent/10 border border-leagle-accent/20 text-leagle-accent text-[9px] font-black uppercase tracking-widest rounded-sm">Institutional Protocol</span>
-                            <span className="text-gray-600 text-[10px] font-black uppercase tracking-widest">Live Storage Engine</span>
-                        </div>
-                        <h1 className="text-6xl md:text-8xl font-serif italic leading-tight tracking-tighter">Protocol <span className="text-gradient">Console</span></h1>
-                        <p className="text-xl text-gray-500 font-serif italic max-w-2xl leading-relaxed">
-                            Manage your persistent institutional credentials and audit neural throughput in real-time.
-                        </p>
-                    </header>
+            {/* Content Layout */}
+            <div className="max-w-[1400px] mx-auto px-6 pt-32 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12">
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                        {/* LEFT: Documentation (4 cols) */}
-                        <div className="lg:col-span-4 space-y-16">
-                            <section>
-                                <h3 className="text-[10px] font-black text-leagle-accent uppercase tracking-widest mb-8 flex items-center gap-2">
-                                    <BookOpen size={12} /> Documentation
-                                </h3>
-                                <nav className="space-y-6 text-gray-600">
-                                    {['Introduction', 'Authentication', 'Neural Search', 'Compliance Audits', 'Key Lifecycles'].map((item, idx) => (
-                                        <div key={item} className={`text-sm font-serif italic cursor-pointer transition-all hover:text-white ${idx === 0 ? 'text-white translate-x-1' : ''}`}>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </nav>
-                            </section>
+                {/* STICKY SIDEBAR */}
+                <aside className="hidden lg:block space-y-12 h-fit sticky top-32">
+                    <section className="space-y-4">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Introduction</h3>
+                        <nav className="flex flex-col gap-2">
+                            {['Overview', 'Architecture', 'Quickstart'].map(item => (
+                                <button key={item} className="text-sm font-serif italic text-left hover:text-leagle-accent transition-colors">{item}</button>
+                            ))}
+                        </nav>
+                    </section>
 
-                            <section className="p-8 border border-white/5 bg-white/[0.01] rounded-sm space-y-6">
-                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Active Storage Status</h4>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-end">
-                                        <span className="text-[10px] text-gray-600 uppercase font-black">Storage Mode</span>
-                                        <span className="text-xs font-mono text-white">PostgreSQL/Async</span>
+                    <section className="space-y-4">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Endpoints</h3>
+                        <nav className="flex flex-col gap-2">
+                            {['Neural Search', 'Protocol Keys', 'Compliance Audit'].map(item => (
+                                <button key={item} className="text-sm font-serif italic text-left hover:text-leagle-accent transition-colors">{item}</button>
+                            ))}
+                        </nav>
+                    </section>
+
+                    <section className="space-y-4 pt-8 border-t border-white/5">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-leagle-accent flex items-center gap-2">
+                            <Activity size={12} /> Interactive
+                        </h3>
+                        <nav className="flex flex-col gap-2">
+                            <button onClick={() => setActiveSection('console')} className={`text-sm font-serif italic text-left transition-all ${activeSection === 'console' ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}>Developer Console</button>
+                            <button onClick={() => setActiveSection('docs')} className={`text-sm font-serif italic text-left transition-all ${activeSection === 'docs' ? 'text-white translate-x-2' : 'text-gray-500 hover:text-white'}`}>API Reference</button>
+                        </nav>
+                    </section>
+                </aside>
+
+                {/* MAIN CONTENT AREA */}
+                <article className="space-y-32">
+
+                    {activeSection === 'docs' ? (
+                        <>
+                            {/* DOCUMENTATION SECTION */}
+                            <section id="introduction" className="space-y-8 max-w-3xl">
+                                <header className="space-y-4">
+                                    <div className="flex items-center gap-2 text-leagle-accent">
+                                        <Globe size={16} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Global Protocol V4</span>
                                     </div>
-                                    <div className="flex justify-between items-end">
-                                        <span className="text-[10px] text-gray-600 uppercase font-black">Active Keys</span>
-                                        <span className="text-xs font-mono text-white">{keys.length + 1}</span>
-                                    </div>
-                                    <div className="h-1 bg-white/5 w-full mt-2">
-                                        <div className="h-full bg-leagle-accent w-full" />
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
+                                    <h1 className="text-6xl font-serif italic text-white leading-[0.9] tracking-tighter">API <span className="text-gradient">Redefined</span></h1>
+                                    <p className="text-lg text-gray-400 font-serif italic leading-relaxed">
+                                        The Leagle Neural Interface provides programmatic access to our institutional-grade vector storage and regulatory inference engine.
+                                    </p>
+                                </header>
 
-                        {/* RIGHT: Console & Playground (8 cols) */}
-                        <div className="lg:col-span-8 space-y-24">
-
-                            {/* Key Management */}
-                            <section className="space-y-8">
-                                <div className="flex justify-between items-end border-b border-white/5 pb-6">
-                                    <div>
-                                        <h2 className="text-2xl font-serif italic text-white text-gradient">Protocol Keys</h2>
-                                        <p className="text-xs text-gray-500 font-serif italic mt-1">Institutional credentials with persistent storage.</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowKeyModal(true)}
-                                        className="flex items-center gap-2 px-6 py-3 bg-white text-black text-[9px] font-black uppercase tracking-widest hover:bg-leagle-accent transition-all"
-                                    >
-                                        <Plus size={14} /> Generate New Key
-                                    </button>
-                                </div>
-
-                                {showKeyModal && (
-                                    <div className="p-8 border border-leagle-accent/20 bg-leagle-accent/[0.02] rounded-sm space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                                        <div>
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 block mb-2">Key Name (e.g., Compliance_Prod)</label>
-                                            <input
-                                                type="text"
-                                                value={newKeyName}
-                                                onChange={(e) => setNewKeyName(e.target.value)}
-                                                className="w-full bg-white/5 border border-white/10 rounded-sm py-4 px-6 text-sm font-serif italic focus:outline-none focus:border-leagle-accent transition-all"
-                                                placeholder="Enter identifier..."
-                                                autoFocus
-                                            />
-                                        </div>
-                                        <div className="flex gap-4">
-                                            <button
-                                                onClick={handleGenerateKey}
-                                                className="px-6 py-3 bg-leagle-accent text-black text-[9px] font-black uppercase tracking-widest hover:bg-white transition-all"
-                                            >
-                                                Generate Protocol Access
-                                            </button>
-                                            <button
-                                                onClick={() => setShowKeyModal(false)}
-                                                className="px-6 py-3 border border-white/10 text-white text-[9px] font-black uppercase tracking-widest hover:bg-white/5 transition-all"
-                                            >
-                                                Cancel
-                                            </button>
+                                <div className="space-y-12 pt-16 border-t border-white/5">
+                                    <div className="space-y-4">
+                                        <h2 className="text-2xl font-serif italic text-white">Authentication</h2>
+                                        <p className="text-gray-400 leading-relaxed font-serif italic">
+                                            All requests must be authenticated using an <code className="text-indigo-400 bg-indigo-400/10 px-1.5 py-0.5 rounded">X-Protocol-Key</code> header.
+                                            You can manage these credentials in the Developer Console.
+                                        </p>
+                                        <div className="bg-[#0a0a0a] border border-white/5 p-6 rounded-sm">
+                                            <code className="text-sm font-mono text-gray-500">headers: &#123; "X-Protocol-Key": "LGL_PROTOCOL_..." &#125;</code>
                                         </div>
                                     </div>
-                                )}
 
-                                <div className="overflow-hidden border border-white/5 rounded-sm bg-white/[0.01]">
-                                    <table className="w-full text-left">
-                                        <thead className="bg-white/5 border-b border-white/5 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                                            <tr>
-                                                <th className="px-6 py-4">Credential</th>
-                                                <th className="px-6 py-4">Secret Protocol Key</th>
-                                                <th className="px-6 py-4">Status</th>
-                                                <th className="px-6 py-4 text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {/* Default Sandbox Key */}
-                                            <tr className={`transition-colors ${selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'bg-leagle-accent/[0.03]' : ''}`}>
-                                                <td className="px-6 py-5">
-                                                    <div className="text-xs font-serif italic text-white">System Default</div>
-                                                    <div className="text-[9px] text-gray-600 font-black mt-1">READ-ONLY SANDBOX</div>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <code className="text-[10px] font-mono text-indigo-400">LGL_PROTOCOL_DEFAULT...</code>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <span className="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Active</span>
-                                                </td>
-                                                <td className="px-6 py-5 text-right flex justify-end gap-2">
-                                                    <button
-                                                        onClick={() => setSelectedKey('LGL_PROTOCOL_DEFAULT_SANDBOX')}
-                                                        className={`px-3 py-1.5 text-[8px] font-black uppercase tracking-widest transition-all ${selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'bg-leagle-accent text-black' : 'border border-white/10 text-gray-500 hover:text-white'}`}
-                                                    >
-                                                        {selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'Using' : 'Use'}
-                                                    </button>
-                                                    <button onClick={() => handleCopy('LGL_PROTOCOL_DEFAULT_SANDBOX')} className="p-1.5 text-gray-600 hover:text-white transition-colors">
-                                                        {copied === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? <Check size={14} /> : <Copy size={14} />}
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            {/* User keys */}
-                                            {keys.map((k) => (
-                                                <tr key={k.id} className={`transition-colors ${selectedKey === k.key ? 'bg-leagle-accent/[0.03]' : ''}`}>
-                                                    <td className="px-6 py-5">
-                                                        <div className="text-xs font-serif italic text-white">{k.name}</div>
-                                                        <div className="text-[9px] text-gray-600 font-black mt-1">CREATED {new Date(k.created_at).toLocaleDateString()}</div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <code className="text-[10px] font-mono text-indigo-400">
-                                                            {k.key.substring(0, 15)}...
-                                                        </code>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Institutional</span>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-right flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => setSelectedKey(k.key)}
-                                                            className={`px-3 py-1.5 text-[8px] font-black uppercase tracking-widest transition-all ${selectedKey === k.key ? 'bg-leagle-accent text-black' : 'border border-white/10 text-gray-500 hover:text-white'}`}
-                                                        >
-                                                            {selectedKey === k.key ? 'Using' : 'Use'}
-                                                        </button>
-                                                        <button onClick={() => handleCopy(k.key)} className="p-1.5 text-gray-600 hover:text-white transition-colors">
-                                                            {copied === k.key ? <Check size={14} /> : <Copy size={14} />}
-                                                        </button>
-                                                        <button onClick={() => handleDeleteKey(k.id)} className="p-1.5 text-gray-600 hover:text-red-400 transition-colors">
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-
-                                            {isFetchingKeys && (
-                                                <tr>
-                                                    <td colSpan="4" className="px-6 py-12 text-center text-[10px] font-serif italic text-gray-600 animate-pulse">
-                                                        Syncing with Neural Storage...
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </section>
-
-                            {/* Neural Playground */}
-                            <section className="space-y-8">
-                                <div className="border-b border-white/5 pb-6 flex justify-between items-end">
-                                    <div>
-                                        <h2 className="text-2xl font-serif italic text-white text-gradient">Neural Playground</h2>
-                                        <p className="text-xs text-gray-500 font-serif italic mt-1">Live Sandbox testing for semantic retrieval.</p>
-                                    </div>
-                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-600">
-                                        Using Key: <span className="text-leagle-accent font-mono ml-2">{activeKey ? `${activeKey.substring(0, 15)}...` : 'NONE'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-12">
-                                    {/* Key Mode Selection */}
-                                    <div className="flex gap-4 p-1 bg-white/5 rounded-sm w-fit border border-white/10">
-                                        <button
-                                            onClick={() => setUseManualKey(false)}
-                                            className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${!useManualKey ? 'bg-leagle-accent text-black shadow-lg shadow-leagle-accent/20' : 'text-gray-500 hover:text-white'}`}
-                                        >
-                                            Saved Keys
-                                        </button>
-                                        <button
-                                            onClick={() => setUseManualKey(true)}
-                                            className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${useManualKey ? 'bg-leagle-accent text-black shadow-lg shadow-leagle-accent/20' : 'text-gray-500 hover:text-white'}`}
-                                        >
-                                            External Key
-                                        </button>
-                                    </div>
-
-                                    {useManualKey && (
-                                        <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 block">Enter Institutional Key</label>
-                                            <div className="flex gap-4">
-                                                <input
-                                                    type="text"
-                                                    value={manualKey}
-                                                    onChange={(e) => setManualKey(e.target.value)}
-                                                    className="flex-1 bg-white/5 border border-white/10 rounded-sm py-4 px-6 text-sm font-mono text-indigo-300 focus:outline-none focus:border-leagle-accent transition-all"
-                                                    placeholder="LGL_PROTOCOL_..."
-                                                />
+                                    <div className="space-y-4">
+                                        <h2 className="text-2xl font-serif italic text-white">Neural Search Engine</h2>
+                                        <p className="text-gray-400 leading-relaxed font-serif italic">
+                                            Perform semantic retrieval across multi-jurisdictional compliance data. Our engine uses RAG (Retrieval Augmented Generation) to ensure high-fidelity citations.
+                                        </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm">
+                                                <h4 className="text-[10px] font-black uppercase text-gray-500 mb-2">Endpoint</h4>
+                                                <code className="text-leagle-accent font-mono text-sm">GET /api/v1/neural/search</code>
                                             </div>
+                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm">
+                                                <h4 className="text-[10px] font-black uppercase text-gray-500 mb-2">Query Param</h4>
+                                                <code className="text-white font-mono text-sm">?query=...&limit=5</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </>
+                    ) : (
+                        /* INTERACTIVE CONSOLE SECTION */
+                        <section className="space-y-24">
+                            <Show when="signed-in">
+                                <div className="space-y-16">
+                                    <header>
+                                        <h1 className="text-4xl font-serif italic text-white flex items-center gap-4">
+                                            <Cpu className="text-leagle-accent" size={32} />
+                                            Protocol <span className="text-gradient">Console</span>
+                                        </h1>
+                                        <p className="text-gray-500 font-serif italic mt-2">Interactive testing and credential management.</p>
+                                    </header>
+
+                                    {/* KEY TABLE - Minimalist */}
+                                    <div className="bg-[#0a0a0a] border border-white/5 rounded-sm overflow-hidden">
+                                        <div className="px-8 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Active Credentials</span>
+                                            <button onClick={() => setShowKeyModal(true)} className="text-[9px] font-black uppercase tracking-widest text-leagle-accent hover:text-white transition-colors flex items-center gap-2">
+                                                <Plus size={12} /> New Protocol
+                                            </button>
+                                        </div>
+                                        <table className="w-full">
+                                            <tbody className="divide-y divide-white/5">
+                                                <tr className={`group ${selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'bg-leagle-accent/5' : ''}`}>
+                                                    <td className="px-8 py-6">
+                                                        <div className="text-sm font-serif italic text-white">Public Sandbox</div>
+                                                        <div className="text-[8px] text-gray-600 font-black tracking-widest mt-1">READ-ONLY ACCESS</div>
+                                                    </td>
+                                                    <td className="px-8 py-6 text-right space-x-4 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => setSelectedKey('LGL_PROTOCOL_DEFAULT_SANDBOX')} className={`text-[8px] font-black uppercase tracking-widest ${selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'text-leagle-accent' : 'text-gray-500 hover:text-white'}`}>
+                                                            {selectedKey === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? 'Active' : 'Select'}
+                                                        </button>
+                                                        <button onClick={() => handleCopy('LGL_PROTOCOL_DEFAULT_SANDBOX')} className="text-gray-500 hover:text-white">
+                                                            {copied === 'LGL_PROTOCOL_DEFAULT_SANDBOX' ? <Check size={14} /> : <Copy size={14} />}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {keys.map(k => (
+                                                    <tr key={k.id} className={`group ${selectedKey === k.key ? 'bg-leagle-accent/5' : ''}`}>
+                                                        <td className="px-8 py-6">
+                                                            <div className="text-sm font-serif italic text-white">{k.name}</div>
+                                                            <div className="text-[8px] text-gray-600 font-black tracking-widest mt-1">INSTITUTIONAL</div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right space-x-4 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => setSelectedKey(k.key)} className={`text-[8px] font-black uppercase tracking-widest ${selectedKey === k.key ? 'text-leagle-accent' : 'text-gray-500 hover:text-white'}`}>
+                                                                {selectedKey === k.key ? 'Active' : 'Select'}
+                                                            </button>
+                                                            <button onClick={() => handleCopy(k.key)} className="text-gray-500 hover:text-white">
+                                                                {copied === k.key ? <Check size={14} /> : <Copy size={14} />}
+                                                            </button>
+                                                            <button onClick={() => handleDeleteKey(k.id)} className="text-gray-500 hover:text-red-400">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* MODAL SIMULATED */}
+                                    {showKeyModal && (
+                                        <div className="p-8 border border-leagle-accent/30 bg-leagle-accent/5 rounded-sm flex items-center gap-6 animate-in slide-in-from-top-4">
+                                            <input value={newKeyName} onChange={e => setNewKeyName(e.target.value)} placeholder="Key Identifier..." className="flex-1 bg-black/40 border border-white/10 rounded-sm py-3 px-4 text-sm font-serif italic focus:outline-none focus:border-leagle-accent" />
+                                            <button onClick={handleGenerateKey} className="px-8 py-3 bg-white text-black text-[9px] font-black uppercase tracking-widest hover:bg-leagle-accent transition-all">Issue Key</button>
+                                            <button onClick={() => setShowKeyModal(false)} className="text-[9px] font-black uppercase text-gray-500 hover:text-white">Cancel</button>
                                         </div>
                                     )}
 
-                                    <div className="relative group">
-                                        <div className="absolute inset-y-0 left-6 flex items-center text-gray-500 group-focus-within:text-leagle-accent transition-colors">
-                                            <Search size={18} />
+                                    {/* PLAYGROUND - Cleaner */}
+                                    <div className="space-y-8">
+                                        <div className="relative group max-w-4xl">
+                                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-leagle-accent transition-colors" size={20} />
+                                            <input value={query} onChange={e => setQuery(e.target.value)} className="w-full bg-[#0a0a0a] border-b border-white/10 py-8 pl-18 pr-40 text-2xl font-serif italic focus:outline-none focus:border-leagle-accent transition-all" placeholder="Neural Search..." />
+                                            <button onClick={runNeuralTest} disabled={isLoading} className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-leagle-accent hover:text-white transition-colors">
+                                                {isLoading ? <RefreshCw className="animate-spin" size={20} /> : <Play size={20} />}
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Execute</span>
+                                            </button>
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={query}
-                                            onChange={(e) => setQuery(e.target.value)}
-                                            className="w-full bg-white/[0.02] border border-white/10 rounded-sm py-6 pl-16 pr-32 text-lg font-serif italic placeholder:text-gray-700 focus:outline-none focus:border-leagle-accent transition-all"
-                                            placeholder="Enter neural query..."
-                                        />
-                                        <button
-                                            onClick={runNeuralTest}
-                                            disabled={isLoading}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 px-8 py-3 bg-leagle-accent text-black text-[9px] font-black uppercase tracking-widest hover:bg-white disabled:opacity-50 transition-all flex items-center gap-2"
-                                        >
-                                            {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
-                                            Run Protocol
-                                        </button>
-                                    </div>
 
-                                    {/* Integration Snippets */}
-                                    <div className="space-y-6">
-                                        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                                            <Zap size={12} className="text-leagle-accent" /> External Integration Snippets
-                                        </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             {Object.entries(getSnippets()).map(([lang, code]) => (
-                                                <div key={lang} className="bg-[#050505] rounded-sm border border-white/5 overflow-hidden flex flex-col">
-                                                    <div className="px-4 py-2 bg-white/5 border-b border-white/5 flex justify-between items-center">
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">{lang}</span>
-                                                        <button
-                                                            onClick={() => handleCopy(code)}
-                                                            className="text-[8px] text-gray-600 hover:text-white transition-colors"
-                                                        >
-                                                            {copied === code ? 'Copied' : 'Copy'}
-                                                        </button>
+                                                <div key={lang} className="p-6 bg-[#0a0a0a] border border-white/5 rounded-sm space-y-4">
+                                                    <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-gray-600">
+                                                        <span>{lang} Integration</span>
+                                                        <button onClick={() => handleCopy(code)} className="hover:text-white transition-colors">{copied === code ? 'Copied' : 'Copy'}</button>
                                                     </div>
-                                                    <div className="p-4 bg-black/40 flex-1">
-                                                        <pre className="text-[10px] font-mono text-gray-400 overflow-x-auto custom-scrollbar leading-relaxed">
-                                                            {code}
-                                                        </pre>
-                                                    </div>
+                                                    <pre className="text-[10px] font-mono text-indigo-400 overflow-x-auto whitespace-pre-wrap">{code}</pre>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
 
-                                    {/* Console Output */}
-                                    <div className="bg-[#050505] rounded-sm border border-white/5 overflow-hidden">
-                                        <div className="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
-                                            <div className="flex items-center gap-2">
-                                                <Terminal size={12} className="text-gray-600" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2 font-sans italic flex items-center gap-2">
-                                                    SIGNAL_OUTPUT.JSON {isLoading && <span className="text-leagle-accent animate-pulse">| INFERENCING...</span>}
-                                                </span>
+                                        <div className="bg-black border border-white/5 min-h-[300px] p-10 rounded-sm relative">
+                                            <div className="absolute top-4 left-4 flex items-center gap-2 text-[8px] font-black text-gray-700 uppercase tracking-widest">
+                                                <Terminal size={10} /> Output Console
                                             </div>
-                                            <button
-                                                onClick={() => setResults(null)}
-                                                className="text-[9px] font-black uppercase tracking-widest text-gray-600 hover:text-white"
-                                            >
-                                                Flush Console
-                                            </button>
-                                        </div>
-                                        <div className="p-8 min-h-[300px] max-h-[600px] overflow-y-auto custom-scrollbar">
                                             {results ? (
-                                                <pre className="text-sm font-mono text-indigo-300 leading-relaxed whitespace-pre-wrap">
+                                                <pre className="text-sm font-mono text-emerald-400/80 leading-relaxed whitespace-pre-wrap">
                                                     {JSON.stringify(results, null, 2)}
                                                 </pre>
                                             ) : (
-                                                <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-20 grayscale opacity-30">
-                                                    <Database size={40} className="text-gray-600" />
-                                                    <p className="text-sm font-serif italic text-gray-500">Awaiting semantic pulse signal...</p>
+                                                <div className="h-full flex items-center justify-center grayscale opacity-10 py-20">
+                                                    <Database size={64} />
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                            </section>
+                            </Show>
 
-                            {/* Institutional Verification Card */}
-                            <section className="p-12 border border-leagle-accent/10 bg-leagle-accent/[0.01] rounded-sm flex flex-col md:flex-row items-center gap-12 justify-between">
-                                <div className="space-y-4">
-                                    <h4 className="text-2xl font-serif italic text-white flex items-center gap-3">
-                                        <Shield size={24} className="text-leagle-accent" /> Institutional Compliance
-                                    </h4>
-                                    <p className="text-gray-500 font-serif italic max-w-lg">
-                                        Every request made through your Protocol Keys is audited and signed for insurance-backed liability reduction.
-                                    </p>
+                            <Show when="signed-out">
+                                <div className="p-20 border border-white/5 bg-white/[0.01] rounded-sm flex flex-col items-center text-center space-y-8 max-w-2xl mx-auto grayscale group hover:grayscale-0 transition-all duration-1000">
+                                    <Lock size={48} className="text-leagle-accent" />
+                                    <div className="space-y-4">
+                                        <h2 className="text-3xl font-serif italic text-white tracking-tight">Interactive Console Restricted</h2>
+                                        <p className="text-gray-500 font-serif italic leading-relaxed">
+                                            Real-time neural playgrounds and credential management are reserved for institutional partners.
+                                        </p>
+                                    </div>
+                                    <SignInButton mode="modal">
+                                        <button className="px-10 py-4 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Establish Session</button>
+                                    </SignInButton>
                                 </div>
-                                <div className="shrink-0 flex flex-col items-end gap-2">
-                                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest">Protocol Version</span>
-                                    <span className="text-2xl font-serif italic text-indigo-400">P-256V4</span>
+                            </Show>
+                        </section>
+                    )}
+
+                    {/* FOOTER NAV (Only for Docs Mode) */}
+                    {activeSection === 'docs' && (
+                        <nav className="pt-20 border-t border-white/5 flex justify-between items-center max-w-3xl">
+                            <div className="grayscale opacity-30">Previous: Solutions</div>
+                            <button onClick={() => setActiveSection('console')} className="group flex items-center gap-4 text-white text-right">
+                                <div className="space-y-1">
+                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Next Up</div>
+                                    <div className="text-xl font-serif italic group-hover:text-leagle-accent transition-colors">Developer Console</div>
                                 </div>
-                            </section>
-                        </div>
-                    </div>
-                </div>
-            </main>
+                                <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                            </button>
+                        </nav>
+                    )}
+                </article>
+            </div>
         </div>
     );
 }
