@@ -5,8 +5,9 @@ import { Terminal, BookOpen, Key, Link as LinkIcon, Database, Shield, Zap, Check
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const API_BASE = `${API_BASE_URL}/api/v1/neural`;
+const API_BASE = '/api/v1/neural';
+// For snippets, we want the full public domain
+const PUBLIC_API_BASE = 'https://leagle-xi.vercel.app/api/v1/neural';
 
 export default function APIPage() {
     const [keys, setKeys] = useState([]);
@@ -18,6 +19,8 @@ export default function APIPage() {
     const [copied, setCopied] = useState(null);
     const [newKeyName, setNewKeyName] = useState('');
     const [showKeyModal, setShowKeyModal] = useState(false);
+    const [manualKey, setManualKey] = useState('');
+    const [useManualKey, setUseManualKey] = useState(false);
 
     useEffect(() => {
         fetchKeys();
@@ -51,7 +54,8 @@ export default function APIPage() {
         try {
             await axios.delete(`${API_BASE}/keys/${id}`);
             setKeys(keys.filter(k => k.id !== id));
-            if (selectedKey === keys.find(k => k.id === id)?.key) {
+            if (activeKey === keys.find(k => k.id === id)?.key) {
+                setUseManualKey(false);
                 setSelectedKey('LGL_PROTOCOL_DEFAULT_SANDBOX');
             }
         } catch (error) {
@@ -65,11 +69,17 @@ export default function APIPage() {
         setTimeout(() => setCopied(null), 2000);
     };
 
+    const activeKey = useManualKey ? manualKey : selectedKey;
+
     const runNeuralTest = async () => {
+        if (!activeKey) {
+            setResults({ error: 'Please provide a valid Protocol Key.' });
+            return;
+        }
         setIsLoading(true);
         try {
             const response = await axios.get(`${API_BASE}/search?query=${encodeURIComponent(query)}&limit=3`, {
-                headers: { 'X-Protocol-Key': selectedKey }
+                headers: { 'X-Protocol-Key': activeKey }
             });
             setResults(response.data);
         } catch (error) {
@@ -78,6 +88,17 @@ export default function APIPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const getSnippets = () => {
+        const keyToUse = activeKey || 'YOUR_PROTOCOL_KEY';
+        const searchUrl = `${PUBLIC_API_BASE}/search?query=${encodeURIComponent(query)}`;
+
+        return {
+            curl: `curl -H "X-Protocol-Key: ${keyToUse}" "${searchUrl}"`,
+            python: `import requests\n\nurl = "${searchUrl}"\nheaders = {"X-Protocol-Key": "${keyToUse}"}\n\nresponse = requests.get(url, headers=headers)\nprint(response.json())`,
+            javascript: `const response = await fetch("${searchUrl}", {\n  headers: {\n    "X-Protocol-Key": "${keyToUse}"\n  }\n});\nconst data = await response.json();\nconsole.log(data);`
+        };
     };
 
     return (
@@ -268,11 +289,42 @@ export default function APIPage() {
                                         <p className="text-xs text-gray-500 font-serif italic mt-1">Live Sandbox testing for semantic retrieval.</p>
                                     </div>
                                     <div className="text-[9px] font-black uppercase tracking-widest text-gray-600">
-                                        Using Key: <span className="text-leagle-accent font-mono ml-2">{selectedKey.substring(0, 15)}...</span>
+                                        Using Key: <span className="text-leagle-accent font-mono ml-2">{activeKey ? `${activeKey.substring(0, 15)}...` : 'NONE'}</span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
+                                <div className="space-y-12">
+                                    {/* Key Mode Selection */}
+                                    <div className="flex gap-4 p-1 bg-white/5 rounded-sm w-fit border border-white/10">
+                                        <button
+                                            onClick={() => setUseManualKey(false)}
+                                            className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${!useManualKey ? 'bg-leagle-accent text-black shadow-lg shadow-leagle-accent/20' : 'text-gray-500 hover:text-white'}`}
+                                        >
+                                            Saved Keys
+                                        </button>
+                                        <button
+                                            onClick={() => setUseManualKey(true)}
+                                            className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${useManualKey ? 'bg-leagle-accent text-black shadow-lg shadow-leagle-accent/20' : 'text-gray-500 hover:text-white'}`}
+                                        >
+                                            External Key
+                                        </button>
+                                    </div>
+
+                                    {useManualKey && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 block">Enter Institutional Key</label>
+                                            <div className="flex gap-4">
+                                                <input
+                                                    type="text"
+                                                    value={manualKey}
+                                                    onChange={(e) => setManualKey(e.target.value)}
+                                                    className="flex-1 bg-white/5 border border-white/10 rounded-sm py-4 px-6 text-sm font-mono text-indigo-300 focus:outline-none focus:border-leagle-accent transition-all"
+                                                    placeholder="LGL_PROTOCOL_..."
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 left-6 flex items-center text-gray-500 group-focus-within:text-leagle-accent transition-colors">
                                             <Search size={18} />
@@ -292,6 +344,33 @@ export default function APIPage() {
                                             {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                                             Run Protocol
                                         </button>
+                                    </div>
+
+                                    {/* Integration Snippets */}
+                                    <div className="space-y-6">
+                                        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                                            <Zap size={12} className="text-leagle-accent" /> External Integration Snippets
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            {Object.entries(getSnippets()).map(([lang, code]) => (
+                                                <div key={lang} className="bg-[#050505] rounded-sm border border-white/5 overflow-hidden flex flex-col">
+                                                    <div className="px-4 py-2 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">{lang}</span>
+                                                        <button
+                                                            onClick={() => handleCopy(code)}
+                                                            className="text-[8px] text-gray-600 hover:text-white transition-colors"
+                                                        >
+                                                            {copied === code ? 'Copied' : 'Copy'}
+                                                        </button>
+                                                    </div>
+                                                    <div className="p-4 bg-black/40 flex-1">
+                                                        <pre className="text-[10px] font-mono text-gray-400 overflow-x-auto custom-scrollbar leading-relaxed">
+                                                            {code}
+                                                        </pre>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     {/* Console Output */}
