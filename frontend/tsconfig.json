@@ -17,13 +17,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-
     // 👇 ADD THESE TWO LINES
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-
     "plugins": [
       {
         "name": "next"

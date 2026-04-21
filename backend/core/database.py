@@ -35,6 +35,11 @@ normalized_database_url = _normalize_database_url(settings.database_url)
 
 # Create async engine with proper configuration for Neon/PostgreSQL
 # Note: asyncpg driver is required for async operations on Neon
+logger.info(f"Connecting to database... (normalized URL length: {len(normalized_database_url)})")
+if normalized_database_url:
+    safe_url = normalized_database_url.split('@')[-1] if '@' in normalized_database_url else normalized_database_url
+    logger.info(f"Database target: {safe_url}")
+
 engine = create_async_engine(
     normalized_database_url,
     echo=False,  # Set to True for SQL logging in debug

@@ -1,4 +1,6 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -8,9 +10,9 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = "postgresql+asyncpg://user:password@localhost/compliance_db"
-    twilio_account_sid: str
-    twilio_auth_token: str
-    twilio_whatsapp_number: str
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_whatsapp_number: str = ""
     # Qdrant
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
@@ -33,16 +35,26 @@ class Settings(BaseSettings):
     # App
     secret_key: str = "your-secret-key-change-in-production"
     environment: str = "development"
-    allowed_origins: list[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://frontend-sepia-three-46.vercel.app",
-        "https://leagle.qzz.io"
-    ]
+    allowed_origins: str | list[str] = ""
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: any) -> list[str]:
+        if isinstance(v, str):
+            if not v:
+                return []
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            return [i.strip() for i in v.split(",")]
+        return v
     
-    class Config:
-        env_file = str(Path(__file__).parent.parent.parent / ".env")
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=str(Path(__file__).parent.parent.parent / ".env"),
+        case_sensitive=False
+    )
 
 
 @lru_cache()
