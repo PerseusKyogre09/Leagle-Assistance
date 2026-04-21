@@ -14,7 +14,7 @@ export default function SolutionsPage() {
                         <header className="max-w-3xl mb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
                             <h2 className="text-leagle-accent text-[10px] font-black uppercase tracking-[0.3em] mb-6">Strategic Applications</h2>
                             <h1 className="text-5xl md:text-7xl font-serif italic mb-8 leading-tight">Tailored Intelligence for <span className="text-gradient">Every Department</span></h1>
-                            <p className="text-xl text-gray-500 font-serif italic leading-relaxed">Specific compliance modules architected for the unique pressures of legal counsel, risk officers, and board executives.</p>
+                            <p className="text-xl text-gray-500 font-serif italic leading-relaxed">Specific compliance modules architected for the unique pressures of legal counsel, risk officers, and board executives. Leagle scales with your organizational complexity.</p>
                         </header>
                     </div>
                 </section>
@@ -24,10 +24,10 @@ export default function SolutionsPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                             {[
-                                { title: "Legal Counsel", desc: "Automate policy-to-reg alignment and remediation roadmap generation.", icon: <FileText /> },
-                                { title: "Risk & Compliance", desc: "Real-time alert monitoring across institutional data silos.", icon: <Search /> },
-                                { title: "Executive Audit", desc: "High-level briefings and strategic impact verdicts for board members.", icon: <Target /> },
-                                { title: "Policy Ingest", desc: "Rapid normalization of internal documents into queryable intelligence.", icon: <ArrowRight /> }
+                                { title: "Legal Counsel", desc: "Automate policy-to-reg alignment and remediation roadmap generation. Reduce non-billable research time by 80% with neural-verified citations.", icon: <FileText /> },
+                                { title: "Risk & Compliance", desc: "Real-time alert monitoring across institutional data silos. Our engine flags potential regulatory drifts before they become liabilities.", icon: <Search /> },
+                                { title: "Executive Audit", desc: "High-level briefings and strategic impact verdicts for board members. Get a weighted risk score for entering new global markets.", icon: <Target /> },
+                                { title: "Policy Ingest", desc: "Rapid normalization of internal documents into queryable intelligence. Turn static employee handbooks into dynamic, searchable compliance links.", icon: <ArrowRight /> }
                             ].map((sol, i) => (
                                 <div key={i} className="glass-card p-16 flex gap-10 hover:border-leagle-accent/30 transition-all rounded-sm group">
                                     <div className="w-16 h-16 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-leagle-accent group-hover:bg-leagle-accent/5 transition-all shrink-0">
@@ -48,11 +48,23 @@ export default function SolutionsPage() {
                         <h2 className="text-leagle-accent text-[10px] font-black uppercase tracking-[0.3em]">Institutional Trust</h2>
                         <h3 className="text-4xl font-serif italic">Beyond Software. Legal Certainty.</h3>
                         <p className="text-lg text-gray-500 font-serif italic leading-relaxed">
-                            "Leagle Intelligence gives our firm the horizontal oversight required to manage multi-jurisdictional compliance without expanding our headcount."
+                            "Leagle Intelligence gives our firm the horizontal oversight required to manage multi-jurisdictional compliance without expanding our headcount. It is the gold standard for neural legal research."
                         </p>
                         <div className="pt-8">
                             <div className="h-px w-20 bg-leagle-accent mx-auto mb-6" />
                             <p className="text-[10px] font-black uppercase tracking-widest text-white italic">General Counsel, Tier-1 Global Financial Hub</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-20 px-6 border-t border-white/5 bg-white/[0.01]">
+                    <div className="max-w-7xl mx-auto text-center space-y-8">
+                        <h4 className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Global Reach</h4>
+                        <h3 className="text-2xl font-serif italic text-white text-gradient">Jurisdictional Coverage</h3>
+                        <div className="flex flex-wrap justify-center gap-12 pt-8">
+                            {['United Kingdom', 'European Union', 'United States', 'MENA Region', 'APAC Cluster'].map((region, i) => (
+                                <div key={i} className="text-sm font-serif italic text-gray-500 border-b border-white/10 pb-2">{region}</div>
+                            ))}
                         </div>
                     </div>
                 </section>

@@ -219,7 +219,7 @@ Using OpenAI's `text-embedding-3-small` model:
 
 ### Medium Term (Week 2-3)
 - [ ] Implement async processing (Celery)
-- [ ] Set up Qdrant vector store
+- [ ] Set up Neural Vector Base storage
 - [ ] Build semantic search endpoint
 - [ ] Add document versioning
 
@@ -330,4 +330,4 @@ Your PDF ingestion pipeline is production-ready. Start uploading PDFs and embedd
 
 **Questions?** Check the documentation files or review the code comments.
 
-**Next:** Integrate with Qdrant for semantic search!
+**Next:** Integrate with Neural Vector Base for semantic search!

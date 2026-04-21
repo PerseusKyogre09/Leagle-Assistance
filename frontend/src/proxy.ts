@@ -4,12 +4,13 @@ const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '
 
 export default clerkMiddleware(async (auth, request) => {
     if (!isPublicRoute(request)) {
-        const { userId, redirectToSignIn } = await auth()
-        if (!userId) {
-            return redirectToSignIn()
-        }
+        await auth.protect();
     }
-})
+}, {
+    authorizedParties: process.env.NODE_ENV === 'production'
+        ? ['https://leagle.pradeepto.qzz.io', 'http://localhost:3000']
+        : undefined
+});
 
 export const config = {
     matcher: [

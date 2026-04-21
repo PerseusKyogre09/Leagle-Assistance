@@ -145,7 +145,7 @@ export default function Home() {
                                     <p className="text-sm text-gray-400 font-serif italic">Build on the Leagle Semantic Index. **Free Sandbox Protocol** (Limited) / High-Throughput API available.</p>
                                 </div>
                             </div>
-                            <Link href="/pricing" className="px-8 py-3 bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all whitespace-nowrap">Explore API Docs</Link>
+                            <Link href="/api" className="px-8 py-3 bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all whitespace-nowrap">Explore API Docs</Link>
                         </div>
 
                         <div className="mt-20">

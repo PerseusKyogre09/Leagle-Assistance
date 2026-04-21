@@ -14,7 +14,7 @@ export default function PlatformPage() {
                         <header className="max-w-3xl mb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
                             <h2 className="text-leagle-accent text-[10px] font-black uppercase tracking-[0.3em] mb-6">Technical Architecture</h2>
                             <h1 className="text-5xl md:text-7xl font-serif italic mb-8 leading-tight">Institutional-Grade <span className="text-gradient">Legal Intelligence</span></h1>
-                            <p className="text-xl text-gray-500 font-serif italic leading-relaxed">Leagle OS is a proprietary neural framework designed for continuous regulatory monitoring and high-fidelity legal impact analysis.</p>
+                            <p className="text-xl text-gray-500 font-serif italic leading-relaxed">Leagle OS is a proprietary neural framework designed for continuous regulatory monitoring and high-fidelity legal impact analysis. We provide the infrastructure for autonomous, yet compliant, enterprise operations.</p>
                         </header>
                     </div>
                 </section>
@@ -24,12 +24,12 @@ export default function PlatformPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                             {[
-                                { title: "Neural Ingestion", desc: "Multi-modal extraction of regulatory updates across SEC, UK Legislation, and internal policies.", icon: <Shield /> },
-                                { title: "RAG Impact Layer", desc: "Retrieval-Augmented Generation for high-fidelity compliance determination and impact analysis.", icon: <Zap /> },
-                                { title: "Semantic Sync", desc: "Real-time synchronization across multiple jurisdictions with automated deficiency detection.", icon: <Globe /> }
+                                { title: "Neural Ingestion", desc: "Multi-modal extraction of regulatory updates across SEC, UK Legislation, and internal policies. Our connectors normalize disparate data streams into queryable neural embeddings.", icon: <Shield /> },
+                                { title: "RAG Impact Layer", desc: "Retrieval-Augmented Generation for high-fidelity compliance determination. We ground model outputs in verifiable legal citations to eliminate hallucinations.", icon: <Zap /> },
+                                { title: "Semantic Sync", desc: "Real-time synchronization across multiple jurisdictions. Automated deficiency detection ensures your internal policies never diverge from global standards.", icon: <Globe /> }
                             ].map((feature, i) => (
-                                <div key={i} className="glass-card p-12 space-y-8 hover:border-leagle-accent/40 transition-all rounded-sm">
-                                    <div className="w-14 h-14 bg-leagle-accent/5 border border-leagle-accent/10 flex items-center justify-center text-leagle-accent">
+                                <div key={i} className="glass-card p-12 space-y-8 hover:border-leagle-accent/40 transition-all rounded-sm group">
+                                    <div className="w-14 h-14 bg-leagle-accent/5 border border-leagle-accent/10 flex items-center justify-center text-leagle-accent group-hover:bg-leagle-accent group-hover:text-black transition-all">
                                         {feature.icon}
                                     </div>
                                     <h3 className="text-2xl font-serif italic">{feature.title}</h3>
@@ -47,12 +47,12 @@ export default function PlatformPage() {
                             <div className="space-y-6">
                                 <h4 className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Security Protocol</h4>
                                 <h3 className="text-xl font-serif">End-to-End Governance</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed font-serif italic">Every analysis is signed with a cryptographic audit trail, ensuring that regulatory decisions are backed by verifiable data provenance and internal policy alignment.</p>
+                                <p className="text-gray-500 text-sm leading-relaxed font-serif italic">Every analysis is signed with a cryptographic audit trail, ensuring that regulatory decisions are backed by verifiable data provenance and internal policy alignment. We utilize AES-256 encryption for data at rest and TLS 1.3 for all neural links.</p>
                             </div>
                             <div className="space-y-6">
                                 <h4 className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Deployment Flex</h4>
                                 <h3 className="text-xl font-serif">Hybrid Cloud & On-Prem</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed font-serif italic">Deploy the Leagle neural engine in your secure VPC or utilize our Tier-IV managed infrastructure for rapid horizontal scaling of legal oversight.</p>
+                                <p className="text-gray-500 text-sm leading-relaxed font-serif italic">Deploy the Leagle neural engine in your secure VPC or utilize our Tier-IV managed infrastructure. Our architecture supports high-availability clusters across Redis, Vector Base, and PostgreSQL to ensure zero-downtime compliance monitoring.</p>
                             </div>
                         </div>
                     </div>

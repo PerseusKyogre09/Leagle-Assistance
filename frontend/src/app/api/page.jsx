@@ -196,18 +196,40 @@ export default function APIPage() {
                                             A high-fidelity, institutional-grade protocol for programmatic regulatory inference and dynamic compliance automation.
                                         </p>
                                     </header>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-16 border-t border-white/5">
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-serif italic text-white">Mission Statement</h3>
-                                            <p className="text-gray-500 font-serif italic leading-relaxed text-sm">
-                                                Leagle bridges the gap between static legal frameworks and active AI operations. Our protocol ensures that every automated decision is grounded in verifiable, multi-jurisdictional compliance data.
-                                            </p>
+                                    <div className="space-y-8 pt-16 border-t border-white/5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            <div className="space-y-4">
+                                                <h3 className="text-xl font-serif italic text-white">Mission Statement</h3>
+                                                <p className="text-gray-500 font-serif italic leading-relaxed text-sm">
+                                                    Leagle bridges the gap between static legal frameworks and active AI operations. Our protocol ensures that every automated decision is grounded in verifiable, multi-jurisdictional compliance data. We believe that AI autonomy should never come at the cost of legal certainty.
+                                                </p>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <h3 className="text-xl font-serif italic text-white">Institutional Grade</h3>
+                                                <p className="text-gray-500 font-serif italic leading-relaxed text-sm">
+                                                    Built for scale, security, and precision. We provide isolated vector environments and immutable audit trails for every inference request, ensuring that your data remains sovereign and your decisions remain defensible.
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-serif italic text-white">Institutional Grade</h3>
+                                        <div className="p-10 bg-white/[0.02] border border-white/5 rounded-sm space-y-6">
+                                            <h3 className="text-xl font-serif italic text-white">Technical Philosophy</h3>
                                             <p className="text-gray-500 font-serif italic leading-relaxed text-sm">
-                                                Built for scale, security, and precision. We provide isolated vector environments and immutable audit trails for every inference request.
+                                                The Leagle Protocol is designed on three core pillars: **Precision**, **Provenance**, and **Privacy**. Unlike generic LLMs that may hallucinate legal advice, our Neural Interface utilizes high-precision retrieval mechanisms to ensure that every response is derived directly from authoritative regulatory sources.
                                             </p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+                                                <div className="space-y-2">
+                                                    <div className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Precision</div>
+                                                    <div className="text-xs text-gray-400 font-serif italic">Sub-millisecond semantic matching against active legislation.</div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Provenance</div>
+                                                    <div className="text-xs text-gray-400 font-serif italic">Every claim backed by a cryptographically signed source citation.</div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="text-leagle-accent text-[10px] font-black uppercase tracking-widest">Privacy</div>
+                                                    <div className="text-xs text-gray-400 font-serif italic">Zero-data retention for sensitive institutional queries.</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -224,13 +246,13 @@ export default function APIPage() {
                                     <div className="space-y-16 pt-12 border-t border-white/5">
                                         <div className="space-y-6">
                                             <p className="text-gray-400 font-serif italic leading-relaxed">
-                                                The Leagle architecture is centered around a multi-layered Neural Link that prioritizes citation accuracy over generative creativity.
+                                                The Leagle architecture is centered around a multi-layered Neural Link that prioritizes citation accuracy over generative creativity. Our engine operates on a stateless, vector-first model designed for massive horizontal scaling.
                                             </p>
                                             <div className="p-10 bg-white/[0.02] border border-white/5 rounded-sm">
                                                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                                                     <div className="text-center space-y-2">
                                                         <div className="text-leagle-accent text-xs font-black">REGULATORY FEED</div>
-                                                        <div className="text-[10px] text-gray-600 font-mono">Real-time Updates</div>
+                                                        <div className="text-[10px] text-gray-600 font-mono">Real-time Ingestion</div>
                                                     </div>
                                                     <ArrowRight className="text-white/10 hidden md:block" />
                                                     <div className="text-center space-y-2 px-8 py-4 border border-leagle-accent/20 bg-leagle-accent/5 rounded-sm">
@@ -240,16 +262,24 @@ export default function APIPage() {
                                                     <ArrowRight className="text-white/10 hidden md:block" />
                                                     <div className="text-center space-y-2">
                                                         <div className="text-emerald-400 text-xs font-black">NEURAL API</div>
-                                                        <div className="text-[10px] text-gray-600 font-mono">JSON Out</div>
+                                                        <div className="text-[10px] text-gray-600 font-mono">JSON/gRPC Out</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-serif italic text-white">RAG Strategy</h3>
-                                            <p className="text-gray-500 font-serif italic text-sm leading-relaxed">
-                                                Every search request triggers a semantic retrieval from the active compliance vector space. The results are filtered through an institutional context mask before being presented to the API surface.
-                                            </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            <div className="space-y-4">
+                                                <h3 className="text-xl font-serif italic text-white">RAG Strategy</h3>
+                                                <p className="text-gray-500 font-serif italic text-sm leading-relaxed">
+                                                    Every search request triggers a semantic retrieval from the active compliance vector space. We use advanced Retrieval-Augmented Generation (RAG) to ground every model response in ground-truth legal documents. The results are filtered through an institutional context mask, ensuring that only relevant, high-confidence citations are surfaced.
+                                                </p>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <h3 className="text-xl font-serif italic text-white">Edge Caching</h3>
+                                                <p className="text-gray-500 font-serif italic text-sm leading-relaxed">
+                                                    To provide sub-100ms response times for global deployments, the Leagle protocol utilizes a distributed edge caching layer for frequent regulatory lookups, while maintaining strict consistency with the primary vector shard.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -265,13 +295,15 @@ export default function APIPage() {
                                     </header>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-white/5">
                                         {[
-                                            { t: 'Neural Link', d: 'The bidirectional connection between your institutional tenant and our compliance vector engines.' },
-                                            { t: 'Protocol Key', d: 'The unique institutional credential required to access specialized regulatory datasets.' },
-                                            { t: 'Active Vector', d: 'The live-updated regulatory embedding that represents a specific jurisdiction or legal topic.' },
-                                            { t: 'Audit Trail', d: 'An immutable log of every API interaction, ensuring full data sovereignty and accountability.' }
+                                            { t: 'Neural Link', d: 'The bidirectional, authenticated connection between your institutional tenant and our compliance vector engines. It facilitates real-time data sync and inference exchange.' },
+                                            { t: 'Protocol Key', d: 'A high-entropy institutional credential required to access specialized regulatory datasets. These keys are scoped to specific workspaces and jurisdictions.' },
+                                            { t: 'Active Vector', d: 'A live-updated regulatory embedding representing a specific jurisdiction (e.g., UK FCA) or legal topic. Active vectors are continuously re-indexed as laws change.' },
+                                            { t: 'Audit Trail', d: 'An immutable, cryptographically hashed log of every API interaction. It provides full data sovereignty and ensures decisions are always auditable by regulators.' },
+                                            { t: 'Workspace Scope', d: 'A logical isolation boundary within your tenant that segregates data, keys, and audit trails for different departments or legal entities.' },
+                                            { t: 'Inference Quota', d: 'The allocated computational budget for neural searches, measured in Request Units (RU) to ensure fair resource distribution across partners.' }
                                         ].map((c, i) => (
-                                            <div key={i} className="p-8 bg-white/[0.01] border border-white/5 rounded-sm space-y-3">
-                                                <h4 className="text-white font-serif italic font-bold">{c.t}</h4>
+                                            <div key={i} className="p-8 bg-white/[0.01] border border-white/5 rounded-sm space-y-3 group hover:border-leagle-accent/20 transition-all">
+                                                <h4 className="text-white font-serif italic font-bold group-hover:text-leagle-accent transition-colors">{c.t}</h4>
                                                 <p className="text-gray-500 text-sm font-serif italic leading-relaxed">{c.d}</p>
                                             </div>
                                         ))}
@@ -287,6 +319,7 @@ export default function APIPage() {
                                             <Zap size={14} /> Get Up & Running
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white leading-tight">Quickstart <span className="text-gradient">Tutorial</span></h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Follow this three-step guide to establish your first Neural Link and begin querying the global regulatory vector space.</p>
                                     </header>
                                     <div className="space-y-20 pt-12 border-t border-white/5">
                                         <div className="flex gap-10">
@@ -295,7 +328,7 @@ export default function APIPage() {
                                                 <div className="space-y-2">
                                                     <h3 className="text-2xl font-serif italic text-white">Issue Your Institutional Key</h3>
                                                     <p className="text-gray-500 font-serif italic leading-relaxed">
-                                                        Access the <button onClick={() => setActiveSection('console')} className="text-leagle-accent underline">Developer Console</button> and generate a new Protocol Key. This key is tied to your tenant and must be kept secure.
+                                                        Access the <button onClick={() => setActiveSection('console')} className="text-leagle-accent underline">Developer Console</button> and generate a new Protocol Key. This key serves as your institutional identity and is required for all authenticated requests. Ensure that keys are scoped appropriately for your development environment.
                                                     </p>
                                                 </div>
                                             </div>
@@ -306,17 +339,30 @@ export default function APIPage() {
                                                 <div className="space-y-2">
                                                     <h3 className="text-2xl font-serif italic text-white">Initialize Your First Link</h3>
                                                     <p className="text-gray-500 font-serif italic leading-relaxed">
-                                                        Execute a semantic search against our UK Financial Compliance 2026 dataset using the following template.
+                                                        Execute a semantic search against our UK Financial Compliance 2026 dataset. Unlike traditional keyword search, this query is processed using our neural engine to find contextually relevant regulatory requirements.
                                                     </p>
                                                 </div>
-                                                <div className="p-6 bg-black border border-white/5 rounded-sm relative group">
-                                                    <code className="text-xs font-mono text-indigo-400 whitespace-pre">
-                                                        curl -H "X-Protocol-Key: YOUR_KEY" \<br />
-                                                        "https://leagle-xi.vercel.app/api/v1/neural/search?query=2026%20compliance"
-                                                    </code>
-                                                    <button onClick={() => handleCopy('curl -H "X-Protocol-Key: YOUR_KEY" "https://leagle-xi.vercel.app/api/v1/neural/search?query=2026%20compliance"')} className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Copy size={14} className="text-gray-600 hover:text-white" />
-                                                    </button>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="p-6 bg-black border border-white/5 rounded-sm relative group">
+                                                        <div className="text-[8px] font-black uppercase text-gray-600 mb-4 tracking-widest">cURL Request</div>
+                                                        <code className="text-[10px] font-mono text-indigo-400 whitespace-pre leading-relaxed">
+                                                            curl -H "X-Protocol-Key: YOUR_KEY" \<br />
+                                                            "https://leagle-xi.vercel.app/api/v1/neural/search?query=2026%20compliance"
+                                                        </code>
+                                                        <button onClick={() => handleCopy('curl -H "X-Protocol-Key: YOUR_KEY" "https://leagle-xi.vercel.app/api/v1/neural/search?query=2026%20compliance"')} className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Copy size={14} className="text-gray-600 hover:text-white" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="p-6 bg-black border border-white/5 rounded-sm relative group">
+                                                        <div className="text-[8px] font-black uppercase text-gray-600 mb-4 tracking-widest">Python SDK</div>
+                                                        <code className="text-[10px] font-mono text-indigo-400 whitespace-pre leading-relaxed">
+                                                            import requests<br />
+                                                            url = "https://leagle-xi.vercel.app/api/v1/neural/search"<br />
+                                                            headers = &#123;"X-Protocol-Key": "YOUR_KEY"&#125;<br />
+                                                            params = &#123;"query": "2026 compliance"&#125;<br />
+                                                            res = requests.get(url, headers=headers, params=params)
+                                                        </code>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -326,7 +372,7 @@ export default function APIPage() {
                                                 <div className="space-y-2">
                                                     <h3 className="text-2xl font-serif italic text-white">Parse Neural Data</h3>
                                                     <p className="text-gray-500 font-serif italic leading-relaxed">
-                                                        Process the structured JSON response in your application. Each search result includes semantic scores and source metadata.
+                                                        Process the structured JSON response. Each search result includes a `score` field (semantic confidence) and `metadata` containing source citations. Use these to automate compliance determinations within your internal systems.
                                                     </p>
                                                 </div>
                                             </div>
@@ -342,20 +388,31 @@ export default function APIPage() {
                                             <Lock size={14} /> Protection
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">Auth & Security</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">The Leagle protocol implements multi-layer defense strategies to ensure institutional data isolation and cryptographic auditability.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5">
-                                        <div className="space-y-4">
+                                        <div className="space-y-6">
                                             <h3 className="text-xl font-serif italic text-white">Header Authentication</h3>
                                             <p className="text-gray-400 font-serif italic leading-relaxed">
-                                                All requests to the Neural Interface MUST include the <code className="text-indigo-400 px-1.5 py-0.5 rounded bg-indigo-400/10">X-Protocol-Key</code> header. We do not support Bearer tokens at this layer to maintain stateless institutional isolation.
+                                                All requests to the Neural Interface MUST include the <code className="text-indigo-400 px-1.5 py-0.5 rounded bg-indigo-400/10">X-Protocol-Key</code> header. We do not support Bearer tokens at this layer to maintain stateless institutional isolation and prevent traditional session-based vulnerabilities.
                                             </p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm space-y-2">
+                                                    <div className="text-white text-xs font-black uppercase tracking-widest">Key Prefix</div>
+                                                    <p className="text-gray-500 text-xs font-serif italic">Keys always start with `LGL_` followed by the environment identifier (e.g., `LGL_PRD_`).</p>
+                                                </div>
+                                                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm space-y-2">
+                                                    <div className="text-white text-xs font-black uppercase tracking-widest">Rate Calculation</div>
+                                                    <p className="text-gray-500 text-xs font-serif italic">Authentication events are logged for billing and security auditing in near real-time.</p>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="p-8 bg-amber-500/[0.03] border border-amber-500/20 rounded-sm flex gap-6">
                                             <Shield size={24} className="text-amber-500 shrink-0" />
                                             <div className="space-y-2">
                                                 <h5 className="text-amber-500 text-[10px] font-black uppercase tracking-widest">Security Advisory</h5>
                                                 <p className="text-gray-500 text-xs font-serif italic leading-relaxed">
-                                                    NEVER hardcode Protocol Keys in frontend applications. Use environment variables and server-side proxies to protect your credentials.
+                                                    NEVER hardcode Protocol Keys in frontend applications. Use environment variables and server-side proxies to protect your credentials. We recommend rotating production keys every 90 days.
                                                 </p>
                                             </div>
                                         </div>
@@ -370,10 +427,11 @@ export default function APIPage() {
                                             <Search size={14} /> Validation
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">Your First Search</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Validate your link connectivity and explore the structure of neural-verified compliance data.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5">
                                         <p className="text-gray-400 font-serif italic leading-relaxed">
-                                            Let's run a test query to verify your Neural Link connectivity. Use the sample below to retrieve the latest regulatory updates.
+                                            Let's run a test query to verify your Neural Link connectivity. Use the sample below to retrieve the latest regulatory updates. Note the returned `latency` and `score` fields which are critical for institutional performance monitoring.
                                         </p>
                                         <div className="space-y-6">
                                             <div className="flex justify-between items-center px-4 py-2 bg-white/[0.02] border-x border-t border-white/5 rounded-t-sm">
@@ -385,6 +443,12 @@ export default function APIPage() {
                                                     {`GET /api/v1/neural/search?query=FinReg%202026&limit=1 HTTP/1.1\nHost: leagle-xi.vercel.app\nX-Protocol-Key: LGL_PROTOCOL_SANDBOX`}
                                                 </pre>
                                             </div>
+                                        </div>
+                                        <div className="space-y-6">
+                                            <h3 className="text-xl font-serif italic text-white">Expected Schema</h3>
+                                            <p className="text-gray-500 text-sm font-serif italic leading-relaxed">
+                                                The response will always follow the institutional JSON schema, including an `audit_trail_id` which must be stored for future compliance reviews.
+                                            </p>
                                         </div>
                                     </div>
                                 </section>
@@ -398,24 +462,31 @@ export default function APIPage() {
                                             <Activity size={14} /> High Precision
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white leading-tight">Neural <span className="text-gradient">Deep-Dive</span></h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Explore the underlying mechanics of our semantic retrieval engine and how it achieves institutional-grade accuracy.</p>
                                     </header>
                                     <div className="space-y-16 pt-12 border-t border-white/5">
                                         <div className="space-y-6">
-                                            <h3 className="text-2xl font-serif italic text-white text-gradient">Understanding Relevance Scores</h3>
+                                            <h3 className="text-2xl font-serif italic text-white text-gradient">Precision vs. Generative Creativity</h3>
                                             <p className="text-gray-500 font-serif italic leading-relaxed">
-                                                Matches returned by the Neural Engine include a precision score from 0.0 to 1.0. A score of 0.8+ indicates high semantic correspondence.
+                                                Unlike standard LLMs that generate responses based on probabilistic token prediction, the Leagle Neural Engine operates on a strict **Retrieval-Grounding** model. We prioritize the retrieval of exact regulatory matches over the generation of "natural" sounding but potentially inaccurate summaries.
+                                            </p>
+                                        </div>
+                                        <div className="space-y-6">
+                                            <h4 className="text-xl font-serif italic text-white">Understanding Relevance Scores</h4>
+                                            <p className="text-gray-500 font-serif italic leading-relaxed">
+                                                Matches returned by the Neural Engine include a precision score from 0.0 to 1.0. This score represents the semantic cosine similarity between the query embedding and the regulatory document fragment.
                                             </p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-sm space-y-4">
                                                 <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">0.85 - 1.0</div>
                                                 <div className="text-sm font-serif italic font-medium text-white">Direct Compliance Match</div>
-                                                <p className="text-gray-600 text-xs font-serif italic leading-relaxed">Explicit reference to the queried regulation or framework.</p>
+                                                <p className="text-gray-600 text-xs font-serif italic leading-relaxed">Explicit reference to the queried regulation or framework. High confidence for automated remediation.</p>
                                             </div>
                                             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-sm space-y-4">
                                                 <div className="text-[10px] font-black text-amber-400 uppercase tracking-widest">0.60 - 0.84</div>
                                                 <div className="text-sm font-serif italic font-medium text-white">Contextual Association</div>
-                                                <p className="text-gray-600 text-xs font-serif italic leading-relaxed">Relates to the core concept but requires expert review.</p>
+                                                <p className="text-gray-600 text-xs font-serif italic leading-relaxed">Relates to the core concept but may involve cross-jurisdictional nuances. Requires human-in-the-loop verification.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -429,16 +500,27 @@ export default function APIPage() {
                                             <RefreshCw size={14} /> Maintenance
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">Key Lifecycle</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Manage the rotation and revocation of institutional credentials to maintain a resilient security posture.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5">
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-serif italic text-white italic">Automatic Expiry</h3>
-                                            <p className="text-gray-400 font-serif italic leading-relaxed font-serif">
-                                                Institutional keys are valid for 90 days. We recommend implementing a 7-day rotation window to ensure zero downtime during credential updates.
+                                            <h3 className="text-xl font-serif italic text-white italic">Rotation Strategy</h3>
+                                            <p className="text-gray-400 font-serif italic leading-relaxed">
+                                                Institutional keys are valid for a maximum of 90 days. We recommend a staggered rotation strategy: generate a new key 7 days before the old one expires, update your internal service configurations, and verify the new link before revoking the legacy key.
                                             </p>
                                         </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm space-y-2">
+                                                <div className="text-white text-xs font-black uppercase tracking-widest">Grace Periods</div>
+                                                <p className="text-gray-600 text-xs font-serif italic">Revoked keys maintain a 24-hour "cooling off" period where they return `403 REVOKED` with a reminder to update endpoints.</p>
+                                            </div>
+                                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-sm space-y-2">
+                                                <div className="text-white text-xs font-black uppercase tracking-widest">Automation</div>
+                                                <p className="text-gray-600 text-xs font-serif italic">Use our Management API to programmatically cycle keys via secure vault integrations like HashiCorp or AWS Secrets Manager.</p>
+                                            </div>
+                                        </div>
                                         <div className="p-6 bg-blue-500/[0.03] border border-blue-500/20 rounded-sm">
-                                            <p className="text-gray-500 text-xs font-serif italic font-bold">PRO TIP: Use our Key API to automate rotations via internal cron jobs.</p>
+                                            <p className="text-gray-500 text-xs font-serif italic font-bold uppercase tracking-widest">Production Note: Revocation is instantaneous across all global shards once confirmed.</p>
                                         </div>
                                     </div>
                                 </section>
@@ -451,20 +533,31 @@ export default function APIPage() {
                                             <Shield size={14} /> Sovereignty
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white leading-tight">Compliance Audit</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Immutable logging and data provenance for regulatory accountability.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5">
                                         <p className="text-gray-400 font-serif italic leading-relaxed">
-                                            Leagle ensures full observability into your AI-driven decision tree. Every request is immutably logged for audit purposes.
+                                            Leagle ensures full observability into your AI-driven decision tree. Every request is immutably logged with a unique `audit_trail_id`, allowing you to reconstruct the exact regulatory context used for any given inference.
                                         </p>
-                                        <div className="space-y-6">
+                                        <div className="space-y-8">
                                             <h3 className="text-xl font-serif italic text-white">Recorded Signal Metadata</h3>
-                                            <ul className="space-y-3">
-                                                {['Timestamp (ISO 8601)', 'Tenant Signature', 'Vector Workspace Scope', 'Inference latency', 'Semantic Relevance Hash'].map((item, i) => (
-                                                    <li key={i} className="flex items-center gap-3 text-sm text-gray-500 font-serif italic">
-                                                        <Check size={14} className="text-emerald-500" /> {item}
-                                                    </li>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {[
+                                                    { l: 'Timestamp (ISO 8601)', v: 'Nanosecond precision for high-frequency trading compliance.' },
+                                                    { l: 'Tenant Signature', v: 'Cryptographic binding to your institutional ID.' },
+                                                    { l: 'Vector Workspace', v: 'The exact subset of legislation queried.' },
+                                                    { l: 'Inference Latency', v: 'End-to-end processing time for SLA monitoring.' },
+                                                    { l: 'Semantic Hash', v: 'A deterministic hash of the retrieved regulatory snippets.' }
+                                                ].map((item, i) => (
+                                                    <div key={i} className="flex gap-4 p-4 border border-white/5 bg-white/[0.01]">
+                                                        <Check size={14} className="text-emerald-500 shrink-0 mt-1" />
+                                                        <div className="space-y-1">
+                                                            <div className="text-xs font-bold text-white">{item.l}</div>
+                                                            <div className="text-[10px] text-gray-500 font-serif italic">{item.v}</div>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -478,6 +571,7 @@ export default function APIPage() {
                                             <LinkIcon size={14} /> Endpoints
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">API Reference</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Exhaustive technical specification for the Neural Search endpoint.</p>
                                     </header>
                                     <div className="space-y-16 pt-12 border-t border-white/5">
                                         <div className="space-y-8">
@@ -496,10 +590,22 @@ export default function APIPage() {
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-white/5">
-                                                        <tr><td className="py-4 text-white">query</td><td className="py-4 text-gray-500">Semantic search query string.</td><td className="py-4 text-indigo-400">Required</td></tr>
-                                                        <tr><td className="py-4 text-white">limit</td><td className="py-4 text-gray-500">Number of results to skip.</td><td className="py-4 text-gray-600">Max 50</td></tr>
+                                                        <tr><td className="py-4 text-white">query</td><td className="py-4 text-gray-500">Semantic search query string (URL encoded).</td><td className="py-4 text-indigo-400">Required</td></tr>
+                                                        <tr><td className="py-4 text-white">limit</td><td className="py-4 text-gray-500">Number of results to return.</td><td className="py-4 text-gray-600">Max 50 (Default: 5)</td></tr>
+                                                        <tr><td className="py-4 text-white">offset</td><td className="py-4 text-gray-500">Number of results to skip for pagination.</td><td className="py-4 text-gray-600">Min 0</td></tr>
+                                                        <tr><td className="py-4 text-white">workspace</td><td className="py-4 text-gray-500">The legislative workspace to target.</td><td className="py-4 text-gray-600">Default: `global`</td></tr>
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <h4 className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Required Headers</h4>
+                                                <div className="p-6 bg-white/[0.01] border border-white/5 space-y-4">
+                                                    <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                        <code className="text-indigo-400 text-xs">X-Protocol-Key</code>
+                                                        <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Required</span>
+                                                    </div>
+                                                    <p className="text-gray-500 text-xs font-serif italic">Your institutional credential issued via the developer console.</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -513,25 +619,36 @@ export default function APIPage() {
                                             <Database size={14} /> Data Model
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white leading-tight">JSON Schema</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Standardized output format for multi-jurisdictional compliance data.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5">
-                                        <div className="p-10 bg-[#0a0a0a] border border-white/5 rounded-sm">
+                                        <div className="p-10 bg-[#0a0a0a] border border-white/5 rounded-sm overflow-hidden">
+                                            <div className="flex justify-between items-center text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] mb-8">
+                                                <span>SearchResponse.json</span>
+                                                <span className="text-emerald-500/50">VALID SCHEMA</span>
+                                            </div>
                                             <pre className="text-xs font-mono text-indigo-400 leading-relaxed overflow-x-auto">
                                                 {`{
   "protocol": "NEURAL_V4",
   "results": [
     {
       "id": "uuid",
-      "content": "Regulatory snippet...",
+      "content": "Regulatory snippet content...",
       "score": 0.982,
       "metadata": {
         "source": "UK_FIN_2026",
-        "chapter": "Compliance 12"
+        "chapter": "Compliance 12",
+        "section": "Item 4.b",
+        "verified_at": "2026-04-21T12:00:00Z"
       }
     }
   ],
-  "latency": "142ms",
-  "audit_trail_id": "aud_123..."
+  "performance": {
+    "latency_ms": 142,
+    "vector_hops": 3
+  },
+  "audit_trail_id": "aud_123_abc",
+  "jurisdiction_scope": ["UK"]
 }`}
                                             </pre>
                                         </div>
@@ -546,19 +663,21 @@ export default function APIPage() {
                                             <Shield size={14} /> Fault Tolerance
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">Error Codes</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Handle edge cases and link failures with institutional grace.</p>
                                     </header>
                                     <div className="space-y-8 pt-12 border-t border-white/5 italic">
                                         {[
-                                            { c: '401', m: 'UNAUTHORIZED_LINK', d: 'Protocol Key is missing or invalid.' },
-                                            { c: '403', m: 'INSTITUTIONAL_BLOCK', d: 'Endpoint restricted for current tenant scope.' },
-                                            { c: '429', m: 'THROTTLING_ACTIVE', d: 'Resource threshold exceeded.' },
-                                            { c: '503', m: 'NEURAL_LINK_FAILURE', d: 'Upstream vector engine unavailable.' }
+                                            { c: '401', m: 'UNAUTHORIZED_LINK', d: 'Protocol Key is missing, invalid, or expired.', r: 'Verify key status in Console.' },
+                                            { c: '403', m: 'INSTITUTIONAL_BLOCK', d: 'Endpoint restricted for current tenant scope.', r: 'Contact account manager for tier upgrade.' },
+                                            { c: '429', m: 'THROTTLING_ACTIVE', d: 'Resource threshold exceeded.', r: 'Implement exponential backoff.' },
+                                            { c: '503', m: 'NEURAL_LINK_FAILURE', d: 'Upstream vector engine unavailable.', r: 'Retry with a 500ms jitter.' }
                                         ].map((err, i) => (
-                                            <div key={i} className="flex gap-8 group">
+                                            <div key={i} className="flex gap-8 group py-4 border-b border-white/5 last:border-0">
                                                 <div className="w-16 font-mono text-red-500 font-bold group-hover:scale-110 transition-transform">{err.c}</div>
-                                                <div className="space-y-1 flex-1">
+                                                <div className="space-y-2 flex-1">
                                                     <div className="text-white text-sm font-black tracking-widest uppercase">{err.m}</div>
                                                     <p className="text-gray-500 text-xs font-serif leading-relaxed">{err.d}</p>
+                                                    <p className="text-[10px] text-leagle-accent font-black uppercase tracking-widest">Recommended: {err.r}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -573,20 +692,22 @@ export default function APIPage() {
                                             <Zap size={14} /> Resource Quotas
                                         </div>
                                         <h2 className="text-5xl font-serif italic text-white">Rate Limits</h2>
+                                        <p className="text-gray-500 font-serif italic max-w-2xl">Ensure protocol stability with fair-use quotas based on institutional demand.</p>
                                     </header>
                                     <div className="space-y-12 pt-12 border-t border-white/5 flex flex-col font-serif italic">
                                         <p className="text-gray-400 font-serif italic leading-relaxed">
-                                            To ensure protocol stability, we implement fair-use quotas based on your institutional tier.
+                                            Leagle implements a token-bucket algorithm for rate limiting. Quotas are calculated at the tenant level across all active Protocol Keys.
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             {[
-                                                { t: 'Sandbox', l: '100 requests / day', c: 'border-white/5 grayscale' },
-                                                { t: 'Institutional', l: '50 req / second', c: 'border-leagle-accent/20 bg-leagle-accent/5' },
-                                                { t: 'Enterprise', l: 'Unlimited Linkage', c: 'border-emerald-500/20 bg-emerald-500/5' }
+                                                { t: 'Sandbox', l: '100 requests / day', d: 'Ideal for initial POC and internal development.', c: 'border-white/5 grayscale' },
+                                                { t: 'Institutional', l: '50 req / second', d: 'Production-ready for scale compliance monitoring.', c: 'border-leagle-accent/20 bg-leagle-accent/5' },
+                                                { t: 'Enterprise', l: 'Unlimited Linkage', d: 'Dedicated infra shards for private vector search.', c: 'border-emerald-500/20 bg-emerald-500/5' }
                                             ].map((tier, i) => (
                                                 <div key={i} className={`p-8 border rounded-sm space-y-4 ${tier.c}`}>
                                                     <h5 className="text-sm font-black uppercase tracking-widest text-white">{tier.t}</h5>
-                                                    <div className="text-[10px] text-gray-500">{tier.l}</div>
+                                                    <div className="text-[10px] text-gray-500 mb-2">{tier.l}</div>
+                                                    <p className="text-[10px] leading-relaxed text-gray-600 font-serif italic">{tier.d}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -710,7 +831,7 @@ export default function APIPage() {
                                     <div className="space-y-4">
                                         <h2 className="text-3xl font-serif italic text-white tracking-tight">Interactive Console Restricted</h2>
                                         <p className="text-gray-500 font-serif italic leading-relaxed">
-                                            Real-time neural playgrounds and credential management are reserved for institutional partners.
+                                            The core retrieval engine utilizing a Neural Vector Base for regulatory indexing.
                                         </p>
                                     </div>
                                     <SignInButton mode="modal">
