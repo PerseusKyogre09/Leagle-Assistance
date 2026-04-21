@@ -99,3 +99,5 @@ temp/
 .DS_Store
 Thumbs.db
 ehthumbs.db
+.vercel
+.env*.local
