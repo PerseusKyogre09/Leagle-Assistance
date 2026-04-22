@@ -30,12 +30,12 @@ CROSS-JURISDICTIONAL CONTEXT (Laws/Regulations from other regions):
 {context}
 
 Respond in JSON only:
-{
+{{
   "explanation": "Brief context including origin and purpose.",
   "comparison": "Evidence-based cross-reference with at least one global standard from the context.",
   "impact_areas": ["List of affected areas"],
   "risk_score": 1-10
-}"""),
+}}"""),
 ])
 
 class RegulationIntelligenceService:
@@ -89,7 +89,9 @@ class RegulationIntelligenceService:
                     chain = INTEL_PROMPT | llm | StrOutputParser()
                     raw_response = await chain.ainvoke({
                         "title": title,
-                        "text": text[:5000]
+                        "text": text[:5000],
+                        "jurisdiction": jurisdiction,
+                        "context": context_str
                     })
                 elif gemini_quota:
                      logger.error("❌ Gemini Quota Exceeded and no valid Groq fallback found.")

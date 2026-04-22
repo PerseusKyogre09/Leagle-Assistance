@@ -12,6 +12,18 @@ from datetime import date
 
 router = APIRouter()
 
+from sqlalchemy import func
+
+@router.get("/jurisdictions")
+async def get_available_jurisdictions(db: AsyncSession = Depends(get_db)):
+    """Returns a list of all jurisdictions with record counts."""
+    result = await db.execute(
+        select(Regulation.jurisdiction, func.count(Regulation.id))
+        .group_by(Regulation.jurisdiction)
+    )
+    data = result.all()
+    return [{"id": j, "count": c} for j, c in data if j]
+
 class RegulationCreate(BaseModel):
     title: str
     text: str
@@ -74,9 +86,16 @@ async def upload_regulation_pdf(
     return {"id": str(regulation.id), "title": regulation.title, "chunks_extracted": len(text.split())}
 
 @router.get("/")
-async def list_regulations(db: AsyncSession = Depends(get_db)):
+async def list_regulations(
+    jurisdiction: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Regulation)
+    if jurisdiction:
+        query = query.where(Regulation.jurisdiction.ilike(f"%{jurisdiction}%"))
+    
     result = await db.execute(
-        select(Regulation).order_by(desc(Regulation.created_at)).limit(50)
+        query.order_by(desc(Regulation.created_at)).limit(500)
     )
     regulations = result.scalars().all()
     return [
