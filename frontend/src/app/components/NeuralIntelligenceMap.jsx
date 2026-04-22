@@ -60,7 +60,18 @@ export default function NeuralIntelligenceMap() {
         'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
         'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
         'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
-        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
+        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' },
+        'DE': { lat: 51.1657, lng: 10.4515, iso2: 'DE' },
+        'FR': { lat: 46.2276, lng: 2.2137, iso2: 'FR' },
+        'JP': { lat: 36.2048, lng: 138.2529, iso2: 'JP' },
+        'CN': { lat: 35.8617, lng: 104.1954, iso2: 'CN' },
+        'RU': { lat: 61.5240, lng: 105.3188, iso2: 'RU' },
+        'BR': { lat: -14.2350, lng: -51.9253, iso2: 'BR' },
+        'SG': { lat: 1.3521, lng: 103.8198, iso2: 'SG' },
+        'KR': { lat: 35.9078, lng: 127.7669, iso2: 'KR' },
+        'MX': { lat: 23.6345, lng: -102.5528, iso2: 'MX' },
+        'ZA': { lat: -30.5595, lng: 22.9375, iso2: 'ZA' },
+        'AE': { lat: 23.4241, lng: 53.8478, iso2: 'AE' }
     }
 
     useEffect(() => {
@@ -116,7 +127,18 @@ export default function NeuralIntelligenceMap() {
         if (name === "India") return "IN"
         if (name === "Australia") return "AU"
         if (name === "Canada") return "CA"
-        if (name === "Belgium" || name === "France" || name === "Germany" || name === "European Union") return "EU"
+        if (name === "Japan") return "JP"
+        if (name === "China") return "CN"
+        if (name === "Germany") return "DE"
+        if (name === "France") return "FR"
+        if (name === "Russia") return "RU"
+        if (name === "Brazil") return "BR"
+        if (name === "Singapore") return "SG"
+        if (name === "South Korea") return "KR"
+        if (name === "Mexico") return "MX"
+        if (name === "South Africa") return "ZA"
+        if (name === "United Arab Emirates" || name === "UAE") return "AE"
+        if (name === "Belgium" || name === "European Union") return "EU"
         return null
     }
 
@@ -180,9 +202,9 @@ export default function NeuralIntelligenceMap() {
                         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
 
                         polygonsData={globeFeatures}
-                        polygonCapColor={() => 'rgba(255, 255, 255, 0.04)'}
-                        polygonSideColor={() => 'rgba(255, 255, 255, 0.02)'}
-                        polygonStrokeColor={() => '#333'}
+                        polygonCapColor={() => 'rgba(255, 255, 255, 0.05)'}
+                        polygonSideColor={() => 'rgba(0, 0, 0, 0)'}
+                        polygonStrokeColor={() => 'rgba(255, 255, 255, 0.1)'}
                         polygonLabel={({ properties: d }) => `<b>${d.NAME}</b>`}
                         onPolygonClick={(poly) => {
                             const iso = poly.properties.ISO_A2 || poly.properties.iso_a2
@@ -194,21 +216,25 @@ export default function NeuralIntelligenceMap() {
                         pointLng="lng"
                         pointColor="color"
                         pointAltitude={0.01}
-                        pointRadius={1.0}
+                        pointRadius={0.8}
 
                         arcsData={arcsData}
                         arcStartLat="startLat"
                         arcStartLng="startLng"
                         arcEndLat="endLat"
                         arcEndLng="endLng"
-                        arcColor="color"
-                        arcDashLength={0.6}
-                        arcDashGap={1.5}
-                        arcDashAnimateTime={4000}
-                        arcStroke={0.6}
+                        arcColor={() => 'rgba(14, 165, 233, 0.4)'} // Consistent teal/blue
+                        arcDashLength={0.4}
+                        arcDashGap={4}
+                        arcDashAnimateTime={8000} // Slower, calmer
+                        arcStroke={0.2} // Thinner arcs
+
+                        showAtmosphere={true}
+                        atmosphereColor="#0ea5e9"
+                        atmosphereAltitude={0.15}
 
                         width={1600}
-                        height={1000}
+                        height={900}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center animate-in duration-500 bg-black/5">
