@@ -107,3 +107,13 @@ def score_to_level(score: int) -> str:
     elif score >= 40:
         return "MEDIUM"
     return "LOW"
+
+
+class RiskScorer:
+    def predict(self, text: str) -> int:
+        return score_regulation(text)
+
+    def to_level(self, score: int) -> str:
+        return score_to_level(score)
+
+risk_scorer = RiskScorer()
