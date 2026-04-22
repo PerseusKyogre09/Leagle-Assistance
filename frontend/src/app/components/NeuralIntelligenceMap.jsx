@@ -29,8 +29,8 @@ import {
     ZoomableGroup
 } from "react-simple-maps"
 
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
-const globeGeoUrl = "https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson"
+// Standard GeoJSON for both 2D and 3D to ensure consistent ISO_A2 access
+const geoUrl = "https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson"
 
 // Dynamic import for Globe.gl
 const Globe = dynamic(() => import('react-globe.gl'), {
@@ -47,19 +47,9 @@ export default function NeuralIntelligenceMap() {
     const [selectedCountry, setSelectedCountry] = useState(null)
     const [countries, setCountries] = useState({ features: [] })
 
-    // Moved coords to top level to avoid ReferenceError
-    const coords = {
-        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
-        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
-        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
-        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
-        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
-        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
-    }
-
     useEffect(() => {
-        // Load country boundaries for 3D globe
-        fetch(globeGeoUrl).then(res => res.json()).then(setCountries)
+        // Load country boundaries for BOTH maps from the same source
+        fetch(geoUrl).then(res => res.json()).then(setCountries)
 
         const fetchData = async () => {
             try {
@@ -77,6 +67,15 @@ export default function NeuralIntelligenceMap() {
         const interval = setInterval(fetchData, 30000)
         return () => clearInterval(interval)
     }, [])
+
+    const coords = {
+        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
+        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
+        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
+        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
+        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
+        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
+    }
 
     const globeData = useMemo(() => {
         if (!data.heatmap) return []
@@ -101,9 +100,12 @@ export default function NeuralIntelligenceMap() {
     }, [data.connections])
 
     const handleCountryClick = (geo) => {
-        const iso2 = geo.properties.ISO_A2 || geo.id
+        // Standard ISO access from Natural Earth GeoJSON
+        const iso2 = geo.properties.ISO_A2 || geo.properties.iso_a2 || geo.id
+        if (iso2 === '-99') return; // Filter out disputed lands if needed
+
         const stats = data.heatmap[iso2] || {
-            name: geo.properties.NAME || "Unknown Jurisdiction",
+            name: geo.properties.NAME || geo.properties.name || "Unknown Jurisdiction",
             count: 0,
             avg_risk: 0,
             color: "#333"
@@ -180,7 +182,7 @@ export default function NeuralIntelligenceMap() {
                     <div className="w-full h-full flex items-center justify-center animate-in duration-500 bg-black/5">
                         <ComposableMap projectionConfig={{ scale: 140 }}>
                             <ZoomableGroup zoom={zoom} onMoveEnd={({ zoom }) => setZoom(zoom)} center={[0, 10]}>
-                                <Geographies geography={geoUrl}>
+                                <Geographies geography={countries.features}>
                                     {({ geographies }) =>
                                         geographies.map((geo) => (
                                             <Geography
