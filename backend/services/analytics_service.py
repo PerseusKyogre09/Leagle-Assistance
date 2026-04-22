@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from sqlalchemy import select, func
-from core.database import SessionLocal
+from core.database import AsyncSessionLocal
 from models.regulation import Regulation
 from services.qdrant_service import semantic_search
 from core.llm_factory import LLMFactory
@@ -228,7 +228,7 @@ class AnalyticsService:
         """
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         
-        async with SessionLocal() as db:
+        async with AsyncSessionLocal() as db:
             # Aggregate risk and counts by jurisdiction
             query = (
                 select(
