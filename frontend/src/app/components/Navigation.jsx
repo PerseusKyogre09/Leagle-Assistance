@@ -26,10 +26,11 @@ export default function Navigation() {
         setSyncMessage('Sync in progress...')
         try {
             const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-            const resp = await fetch(`${API_BASE_URL}/api/regulations/sync/uk`, { method: 'POST' })
+            const resp = await fetch(`${API_BASE_URL}/api/regulations/sync/all`, { method: 'POST' })
             const data = await resp.json()
-            setSyncMessage(`Sync complete: ${data.count} regulations added.`)
-            window.location.reload()
+            const total = data.results?.total || 0
+            setSyncMessage(`Global Sync complete: ${total} regulations updated.`)
+            setTimeout(() => window.location.reload(), 2000)
         } catch (e) {
             setSyncMessage('Sync failed. Try again.')
         } finally {
