@@ -37,39 +37,44 @@ async def ingest_regulation(
     ensure_collection_exists()
 
     # Step 1: Create PostgreSQL record (without Qdrant IDs yet)
-    regulation = Regulation(
-        title=title,
-        raw_text=text,
-        source=source,
-        category=category,
-        jurisdiction=jurisdiction,
-        effective_date=effective_date,
-    )
-    db.add(regulation)
-    await db.flush()   # get the UUID without committing
+    try:
+        regulation = Regulation(
+            title=title,
+            raw_text=text,
+            source=source,
+            category=category,
+            jurisdiction=jurisdiction,
+            effective_date=effective_date,
+        )
+        db.add(regulation)
+        await db.flush()   # get the UUID without committing
 
-    # Step 2: Embed + store in Qdrant
-    metadata = {
-        "regulation_id": str(regulation.id),
-        "title": title,
-        "source": source or "",
-        "category": category or "uncategorized",
-        "jurisdiction": jurisdiction or "",
-    }
-    point_ids = embed_and_upsert(text=text, metadata=metadata, source_type="regulation")
+        # Step 2: Embed + store in Qdrant
+        metadata = {
+            "regulation_id": str(regulation.id),
+            "title": title,
+            "source": source or "",
+            "category": category or "uncategorized",
+            "jurisdiction": jurisdiction or "",
+        }
+        point_ids = embed_and_upsert(text=text, metadata=metadata, source_type="regulation")
 
-    # Step 3: Update record with Qdrant IDs
-    regulation.qdrant_ids = point_ids
+        # Step 3: Update record with Qdrant IDs
+        regulation.qdrant_ids = point_ids
 
-    # Step 4: Score risk (import here to avoid circular imports)
-    from services.risk_scorer import score_regulation
-    regulation.risk_level = score_regulation(text)
+        # Step 4: Score risk (import here to avoid circular imports)
+        from services.risk_scorer import score_regulation
+        regulation.risk_level = score_regulation(text)
 
-    await db.commit()
-    await db.refresh(regulation)
-
-    logger.info(f"Ingested regulation: {title} | Risk: {regulation.risk_level} | Chunks: {len(point_ids)}")
-    return regulation
+        await db.commit()
+        await db.refresh(regulation)
+        
+        logger.info(f"Ingested regulation: {title} | Risk: {regulation.risk_level} | Chunks: {len(point_ids)}")
+        return regulation
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"❌ Ingestion Failed for {title}: {e}")
+        raise e
 
 async def ingest_policy(
     db: AsyncSession,
