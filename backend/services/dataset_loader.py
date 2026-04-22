@@ -375,6 +375,55 @@ class RegulatoryDatasetSeeder:
                 "source": "DPDP Act",
             },
         ],
+        "australia_privacy": [
+            {
+                "title": "Australian Privacy Principles (APP)",
+                "text": """
+                The Privacy Act 1988 (Privacy Act) is the principal piece of Australian legislation 
+                protecting the handling of personal information about individuals. 
+                Schedule 1 of the Privacy Act contains the 13 Australian Privacy Principles (APPs).
+                - Open and transparent management of personal information
+                - Anonymity and pseudonymity
+                - Collection of solicited personal information
+                """,
+                "category": "data_privacy",
+                "jurisdiction": "Australia",
+                "source": "Privacy Act 1988",
+            }
+        ],
+        "canada_pipeda": [
+            {
+                "title": "Personal Information Protection and Electronic Documents Act (PIPEDA)",
+                "text": """
+                PIPEDA is the federal privacy law for private-sector organizations in Canada. 
+                It sets out the ground rules for how businesses must handle personal information 
+                in the course of commercial activity.
+                - Accountability
+                - Identifying Purposes
+                - Consent
+                - Limiting Collection
+                """,
+                "category": "data_privacy",
+                "jurisdiction": "Canada",
+                "source": "PIPEDA",
+            }
+        ],
+        "singapore_pdpa": [
+            {
+                "title": "Personal Data Protection Act (PDPA)",
+                "text": """
+                The PDPA provides a baseline standard of protection for personal data in Singapore. 
+                It complements sector-specific legislative and regulatory frameworks such as 
+                the Banking Act and Securities and Futures Act.
+                - Consent Obligation
+                - Purpose Limitation Obligation
+                - Notification Obligation
+                """,
+                "category": "data_privacy",
+                "jurisdiction": "Singapore",
+                "source": "PDPA",
+            }
+        ],
     }
     
     @staticmethod

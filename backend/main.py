@@ -54,6 +54,7 @@ app.add_middleware(
 )
 
 from services.uk_legis_service import sync_uk_feed
+from services.sync_manager import sync_all_jurisdictions
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from fastapi import Depends
@@ -62,6 +63,11 @@ from fastapi import Depends
 async def trigger_uk_sync(db: AsyncSession = Depends(get_db)):
     count = await sync_uk_feed(db, limit=10)
     return {"status": "success", "count": count}
+
+@app.post("/api/regulations/sync/all")
+async def trigger_global_sync(db: AsyncSession = Depends(get_db)):
+    results = await sync_all_jurisdictions(db, limit_per_source=10)
+    return {"status": "success", "results": results}
 
 app.include_router(regulations.router, prefix="/api/regulations", tags=["regulations"])
 app.include_router(policies.router, prefix="/api/policies", tags=["policies"])

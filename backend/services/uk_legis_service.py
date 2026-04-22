@@ -13,7 +13,7 @@ from services.alert_engine import run_impact_analysis
 
 logger = logging.getLogger(__name__)
 
-UK_FEED_URL = "https://www.legislation.gov.uk/all/data.feed?page=1"
+UK_FEED_URL = "https://www.legislation.gov.uk/new/data.feed"
 
 async def sync_uk_feed(db: AsyncSession, limit: int = 10):
     """
