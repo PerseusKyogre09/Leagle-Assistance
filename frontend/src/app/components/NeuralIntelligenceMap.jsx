@@ -47,6 +47,16 @@ export default function NeuralIntelligenceMap() {
     const [selectedCountry, setSelectedCountry] = useState(null)
     const [countries, setCountries] = useState({ features: [] })
 
+    // Moved coords to top level to avoid ReferenceError
+    const coords = {
+        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
+        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
+        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
+        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
+        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
+        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
+    }
+
     useEffect(() => {
         // Load country boundaries for 3D globe
         fetch(globeGeoUrl).then(res => res.json()).then(setCountries)
@@ -89,15 +99,6 @@ export default function NeuralIntelligenceMap() {
             name: conn.label
         }))
     }, [data.connections])
-
-    const coords = {
-        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
-        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
-        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
-        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
-        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
-        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
-    }
 
     const handleCountryClick = (geo) => {
         const iso2 = geo.properties.ISO_A2 || geo.id
@@ -150,7 +151,7 @@ export default function NeuralIntelligenceMap() {
                         polygonsData={countries.features}
                         polygonCapColor={() => 'rgba(255, 255, 255, 0.05)'}
                         polygonSideColor={() => 'rgba(255, 255, 255, 0.02)'}
-                        polygonStrokeColor={() => '#333'}
+                        polygonStrokeColor={() => '#444'}
                         polygonLabel={({ properties: d }) => `<b>${d.NAME}</b>`}
                         onPolygonClick={(poly) => handleCountryClick(poly)}
 
@@ -186,12 +187,12 @@ export default function NeuralIntelligenceMap() {
                                                 key={geo.rsmKey}
                                                 geography={geo}
                                                 fill="#050505"
-                                                stroke="#222"
+                                                stroke="#333"
                                                 strokeWidth={0.5}
                                                 onClick={() => handleCountryClick(geo)}
                                                 style={{
                                                     default: { outline: "none" },
-                                                    hover: { fill: "#111", stroke: "#444", outline: "none", cursor: "pointer" },
+                                                    hover: { fill: "#111", stroke: "#leagle-accent", outline: "none", cursor: "pointer" },
                                                     pressed: { fill: "#leagle-accent", outline: "none" },
                                                 }}
                                             />
