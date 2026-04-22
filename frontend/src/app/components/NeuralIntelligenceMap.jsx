@@ -29,8 +29,9 @@ import {
     ZoomableGroup
 } from "react-simple-maps"
 
-// Standard GeoJSON for both 2D and 3D to ensure consistent ISO_A2 access
-const geoUrl = "https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson"
+// Sources optimized for their respective libraries
+const TOPO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+const GLOBE_GEO_URL = "https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson"
 
 // Dynamic import for Globe.gl
 const Globe = dynamic(() => import('react-globe.gl'), {
@@ -45,11 +46,11 @@ export default function NeuralIntelligenceMap() {
     const [loading, setLoading] = useState(true)
     const [zoom, setZoom] = useState(1)
     const [selectedCountry, setSelectedCountry] = useState(null)
-    const [countries, setCountries] = useState({ features: [] })
+    const [globeFeatures, setGlobeFeatures] = useState([])
 
     useEffect(() => {
-        // Load country boundaries for BOTH maps from the same source
-        fetch(geoUrl).then(res => res.json()).then(setCountries)
+        // Load country boundaries for 3D globe only
+        fetch(GLOBE_GEO_URL).then(res => res.json()).then(res => setGlobeFeatures(res.features))
 
         const fetchData = async () => {
             try {
@@ -99,18 +100,27 @@ export default function NeuralIntelligenceMap() {
         }))
     }, [data.connections])
 
-    const handleCountryClick = (geo) => {
-        // Standard ISO access from Natural Earth GeoJSON
-        const iso2 = geo.properties.ISO_A2 || geo.properties.iso_a2 || geo.id
-        if (iso2 === '-99') return; // Filter out disputed lands if needed
+    // Mapping Numerical/Name IDs from topojson to ISO_A2
+    const map2DToISO = (geo) => {
+        const name = geo.properties.name
+        if (name === "United States of America" || name === "USA") return "US"
+        if (name === "United Kingdom") return "GB"
+        if (name === "India") return "IN"
+        if (name === "Australia") return "AU"
+        if (name === "Canada") return "CA"
+        // European Union check is trickier as it's multiple countries, using Belgium/Brussels as hub proxy if needed
+        if (name === "Belgium" || name === "France" || name === "Germany") return "EU"
+        return null
+    }
 
-        const stats = data.heatmap[iso2] || {
-            name: geo.properties.NAME || geo.properties.name || "Unknown Jurisdiction",
+    const handleCountryClick = (stats_id, name) => {
+        const stats = data.heatmap[stats_id] || {
+            name: name || "Unknown Jurisdiction",
             count: 0,
             avg_risk: 0,
             color: "#333"
         }
-        setSelectedCountry({ ...stats, id: iso2 })
+        setSelectedCountry({ ...stats, id: stats_id })
     }
 
     if (loading) return (
@@ -150,12 +160,15 @@ export default function NeuralIntelligenceMap() {
                         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
                         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
 
-                        polygonsData={countries.features}
+                        polygonsData={globeFeatures}
                         polygonCapColor={() => 'rgba(255, 255, 255, 0.05)'}
                         polygonSideColor={() => 'rgba(255, 255, 255, 0.02)'}
-                        polygonStrokeColor={() => '#444'}
+                        polygonStrokeColor={() => '#333'}
                         polygonLabel={({ properties: d }) => `<b>${d.NAME}</b>`}
-                        onPolygonClick={(poly) => handleCountryClick(poly)}
+                        onPolygonClick={(poly) => {
+                            const iso = poly.properties.ISO_A2 || poly.properties.iso_a2
+                            handleCountryClick(iso, poly.properties.NAME)
+                        }}
 
                         pointsData={globeData}
                         pointLat="lat"
@@ -180,18 +193,21 @@ export default function NeuralIntelligenceMap() {
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center animate-in duration-500 bg-black/5">
-                        <ComposableMap projectionConfig={{ scale: 140 }}>
-                            <ZoomableGroup zoom={zoom} onMoveEnd={({ zoom }) => setZoom(zoom)} center={[0, 10]}>
-                                <Geographies geography={countries.features}>
+                        <ComposableMap projectionConfig={{ scale: 120 }}>
+                            <ZoomableGroup zoom={zoom} onMoveEnd={({ zoom }) => setZoom(zoom)} center={[0, 0]}>
+                                <Geographies geography={TOPO_URL}>
                                     {({ geographies }) =>
                                         geographies.map((geo) => (
                                             <Geography
                                                 key={geo.rsmKey}
                                                 geography={geo}
                                                 fill="#050505"
-                                                stroke="#333"
+                                                stroke="#222"
                                                 strokeWidth={0.5}
-                                                onClick={() => handleCountryClick(geo)}
+                                                onClick={() => {
+                                                    const iso = map2DToISO(geo)
+                                                    if (iso) handleCountryClick(iso, geo.properties.name)
+                                                }}
                                                 style={{
                                                     default: { outline: "none" },
                                                     hover: { fill: "#111", stroke: "#leagle-accent", outline: "none", cursor: "pointer" },
@@ -229,10 +245,10 @@ export default function NeuralIntelligenceMap() {
                 )}
             </div>
 
-            {/* JURISDICTION MODAL */}
+            {/* MODAL SYSTEM */}
             {selectedCountry && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] animate-in zoom-in duration-300">
-                    <div className="bg-black/90 backdrop-blur-3xl border border-white/10 p-8 min-w-[320px] shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+                <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-black/90 backdrop-blur-3xl border border-white/10 p-8 min-w-[320px] shadow-[0_0_100px_rgba(0,0,0,1)] relative select-none">
                         <button
                             onClick={() => setSelectedCountry(null)}
                             className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
@@ -244,45 +260,45 @@ export default function NeuralIntelligenceMap() {
                             <div className="w-1.5 h-12" style={{ backgroundColor: selectedCountry.color }} />
                             <div>
                                 <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">{selectedCountry.name}</h2>
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">Intelligence Node: {selectedCountry.id}</p>
+                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">Node Reference: {selectedCountry.id}</p>
                             </div>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Analyzed Assets</p>
-                                    <div className="flex items-center gap-2">
-                                        <FileText size={12} className="text-leagle-accent" />
-                                        <span className="text-xl font-bold text-white">{selectedCountry.count || 0}</span>
+                        <div className="space-y-8">
+                            <div className="grid grid-cols-2 gap-8">
+                                <div className="space-y-2">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Intelligence Mass</p>
+                                    <div className="flex items-center gap-3">
+                                        <FileText size={14} className="text-leagle-accent" />
+                                        <span className="text-2xl font-black text-white">{selectedCountry.count || 0}</span>
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Aggregated Risk</p>
-                                    <div className="flex items-center gap-2">
-                                        <TrendingUp size={12} style={{ color: selectedCountry.color }} />
-                                        <span className="text-xl font-bold text-white" style={{ color: selectedCountry.color }}>
-                                            {Math.round(selectedCountry.avg_risk || 0)}
+                                <div className="space-y-2">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Regional Divergence</p>
+                                    <div className="flex items-center gap-3">
+                                        <TrendingUp size={14} style={{ color: selectedCountry.color }} />
+                                        <span className="text-2xl font-black text-white" style={{ color: selectedCountry.color }}>
+                                            {Math.round(selectedCountry.avg_risk || 0)}%
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-white/5">
-                                <p className="text-[10px] text-slate-400 font-medium italic">
-                                    Active semantic cross-referencing for {selectedCountry.name} shows elevated activity in sustainability and financial transparency protocols.
+                            <div className="pt-8 border-t border-white/5">
+                                <p className="text-[11px] text-slate-500 font-medium italic leading-relaxed">
+                                    Cross-referencing {selectedCountry.name} yields high semantic correlation with global transparency initiatives. System suggests deep-layer validation for upcoming sustainability reporting drafts.
                                 </p>
                             </div>
 
-                            <button className="w-full py-3 bg-leagle-accent text-black text-[9px] font-black uppercase tracking-[0.3em] hover:bg-white transition-all shadow-glow active:scale-95">
-                                Drill Down into Node
+                            <button className="w-full py-4 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.4em] hover:bg-leagle-accent hover:text-black hover:border-transparent transition-all active:scale-95">
+                                Execute Deep Link Analysis
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* COMPACT HUD: Top Left */}
+            {/* COMPACT HUD */}
             <div className="absolute top-6 left-6 z-50 select-none">
                 <div className="bg-black/80 backdrop-blur-2xl px-5 py-4 border border-white/10 space-y-3 min-w-[180px]">
                     <div className="flex items-center gap-2.5">
@@ -291,18 +307,18 @@ export default function NeuralIntelligenceMap() {
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/5 font-mono">
                         <div><p className="text-[11px] font-black text-white">{data.summary?.cross_border_parallels || 0}</p></div>
-                        <div><p className="text-[11px] font-black text-emerald-500 tracking-tighter uppercase">Live</p></div>
+                        <div><p className="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Active</p></div>
                     </div>
                 </div>
             </div>
 
-            {/* ZOOM CONTROLS: Bottom Right */}
+            {/* ZOOM & FOCUS */}
             <div className="absolute bottom-6 right-6 z-40 flex items-center gap-2">
-                <div className="flex bg-black/60 backdrop-blur-md border border-white/10 p-0.5 mr-2">
-                    <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} className="p-2 text-slate-500 hover:text-white"><ZoomOut size={12} /></button>
-                    <button onClick={() => setZoom(z => Math.min(z + 0.5, 5))} className="p-2 text-slate-500 hover:text-white border-l border-white/5"><ZoomIn size={12} /></button>
+                <div className="flex bg-black/60 backdrop-blur-md border border-white/10 p-1 mr-2 gap-1 rounded-sm">
+                    <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} className="p-2 text-slate-500 hover:text-white"><ZoomOut size={14} /></button>
+                    <button onClick={() => setZoom(z => Math.min(z + 0.5, 8))} className="p-2 text-slate-500 hover:text-white border-l border-white/10"><ZoomIn size={14} /></button>
                 </div>
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 p-1 flex gap-1">
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 p-1 flex gap-1 rounded-sm">
                     {['US', 'UK', 'EU', 'IN', 'AU'].map(iso => (
                         <button
                             key={iso}
@@ -312,7 +328,7 @@ export default function NeuralIntelligenceMap() {
                                     globeRef.current.pointOfView({ lat: target.lat, lng: target.lng, altitude: 1.8 }, 1500)
                                 }
                             }}
-                            className="px-3 py-1 text-[8px] font-black text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                            className="px-4 py-2 text-[9px] font-black text-slate-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest"
                         >
                             {iso}
                         </button>
