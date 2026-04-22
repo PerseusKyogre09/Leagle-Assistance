@@ -80,11 +80,10 @@ export default function NeuralIntelligenceMap() {
         return () => clearInterval(interval)
     }, [])
 
-    // Filter out any jurisdictions that don't have coordinates to avoid (0,0) placement in ocean
     const globeData = useMemo(() => {
         if (!data.heatmap) return []
         return Object.values(data.heatmap)
-            .filter(d => coords[d.id]) // CRITICAL: Only show if we have valid coords
+            .filter(d => coords[d.id])
             .map(d => ({
                 ...d,
                 lat: coords[d.id].lat,
@@ -96,7 +95,7 @@ export default function NeuralIntelligenceMap() {
     const arcsData = useMemo(() => {
         if (!data.connections) return []
         return data.connections
-            .filter(conn => coords[conn.startId] && coords[conn.endId]) // CRITICAL: Only show if starts/ends exist
+            .filter(conn => coords[conn.startId] && coords[conn.endId])
             .map(conn => ({
                 startLat: coords[conn.startId].lat,
                 startLng: coords[conn.startId].lng,
@@ -118,14 +117,16 @@ export default function NeuralIntelligenceMap() {
         return null
     }
 
-    const handleCountryClick = (stats_id, name) => {
-        const stats = data.heatmap[stats_id] || {
-            name: name || "Unknown Jurisdiction",
-            count: 0,
-            avg_risk: 0,
-            color: "#333"
+    const handleCountryClick = (stats_id, fallback_name) => {
+        const backend_stats = data.heatmap[stats_id] || {}
+        const stats = {
+            id: stats_id,
+            name: backend_stats.name || fallback_name || stats_id || "Unknown Node",
+            count: backend_stats.count || 0,
+            avg_risk: backend_stats.avg_risk || 0,
+            color: backend_stats.color || "#333"
         }
-        setSelectedCountry({ ...stats, id: stats_id })
+        setSelectedCountry(stats)
     }
 
     if (loading) return (
@@ -255,23 +256,25 @@ export default function NeuralIntelligenceMap() {
                 <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
                     <div className="bg-[#050505] border border-white/10 p-10 min-w-[380px] shadow-[0_0_150px_rgba(0,0,0,1)] relative select-none ring-1 ring-white/5">
 
-                        {/* Close Button - More Persistent */}
+                        {/* Close Button - MEGA SIZE */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedCountry(null);
                             }}
-                            className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white hover:bg-white/5 transition-all rounded-sm z-[110]"
+                            className="absolute top-4 right-4 p-4 text-slate-500 hover:text-white hover:bg-white/5 transition-all rounded-full z-[110]"
                         >
-                            <X size={20} strokeWidth={3} />
+                            <X size={24} strokeWidth={3} />
                         </button>
 
                         <div className="flex items-center gap-6 mb-10">
                             <div className="w-2 h-16 shadow-glow" style={{ backgroundColor: selectedCountry.color }} />
                             <div className="space-y-1">
-                                <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">{selectedCountry.name}</h2>
+                                <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">
+                                    {selectedCountry.name}
+                                </h2>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Node Hash: {selectedCountry.id}</span>
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Node Reference: {selectedCountry.id}</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 </div>
                             </div>
@@ -283,7 +286,7 @@ export default function NeuralIntelligenceMap() {
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Intelligence Mass</p>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-4xl font-black text-white leading-none">{selectedCountry.count || 0}</span>
-                                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Units</span>
+                                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Points</span>
                                     </div>
                                 </div>
                                 <div className="space-y-3">
@@ -299,12 +302,15 @@ export default function NeuralIntelligenceMap() {
 
                             <div className="bg-white/5 p-4 border-l-2 border-slate-700">
                                 <p className="text-[11px] text-slate-400 font-medium italic leading-relaxed">
-                                    Autonomous tracking for {selectedCountry.name} active. Semantic synthesis detects high divergence in localized labor frameworks compared to G7 baselines.
+                                    Autonomous tracking for <span className="text-white not-italic font-bold">{selectedCountry.name}</span> active. Semantic synthesis detects high divergence in localized regulatory frameworks.
                                 </p>
                             </div>
 
                             <button
-                                onClick={() => alert(`Deep Link Analysis Initiated for ${selectedCountry.name}`)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    alert(`Deep Link Analysis Initiated for ${selectedCountry.name || selectedCountry.id}`);
+                                }}
                                 className="group w-full py-5 bg-leagle-accent text-black text-[11px] font-black uppercase tracking-[0.5em] hover:bg-white transition-all shadow-glow flex items-center justify-center gap-3 active:scale-[0.98]"
                             >
                                 <ExternalLink size={14} />
@@ -314,50 +320,6 @@ export default function NeuralIntelligenceMap() {
                     </div>
                 </div>
             )}
-
-            {/* COMPACT HUD */}
-            <div className="absolute top-6 left-6 z-50 select-none">
-                <div className="bg-black/80 backdrop-blur-2xl px-5 py-4 border border-white/10 space-y-3 min-w-[200px]">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-1 h-5 bg-leagle-accent shadow-glow" />
-                        <h2 className="text-[13px] font-black text-white tracking-[0.2em] uppercase italic leading-none">Neural Core</h2>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[7px] font-bold text-slate-600 uppercase">Mass</span>
-                            <span className="text-[14px] font-black text-white">{data.summary?.cross_border_parallels || 0}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[7px] font-bold text-slate-600 uppercase">Sync</span>
-                            <span className="text-[14px] font-black text-emerald-500 uppercase tracking-tighter">Live</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* ZOOM & CONTROL STRIP */}
-            <div className="absolute bottom-6 right-6 z-40 flex items-center gap-2">
-                <div className="flex bg-black/60 backdrop-blur-md border border-white/10 p-1 mr-2 gap-1 rounded-sm">
-                    <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} className="p-2 text-slate-500 hover:text-white"><ZoomOut size={14} /></button>
-                    <button onClick={() => setZoom(z => Math.min(z + 0.5, 12))} className="p-2 text-slate-500 hover:text-white border-l border-white/10"><ZoomIn size={14} /></button>
-                </div>
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 p-1 flex gap-1 rounded-sm">
-                    {['US', 'UK', 'EU', 'IN', 'AU'].map(iso => (
-                        <button
-                            key={iso}
-                            onClick={() => {
-                                if (mode === '3d' && globeRef.current) {
-                                    const target = coords[iso]
-                                    globeRef.current.pointOfView({ lat: target.lat, lng: target.lng, altitude: 1.8 }, 1500)
-                                }
-                            }}
-                            className="px-5 py-2.5 text-[10px] font-black text-slate-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest"
-                        >
-                            {iso}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
         </div>
     )
