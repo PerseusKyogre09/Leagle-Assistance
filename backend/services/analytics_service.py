@@ -1,5 +1,10 @@
 import logging
+import json
+from datetime import datetime, timedelta
 from typing import List, Dict, Any
+from sqlalchemy import select, func
+from core.database import SessionLocal
+from models.regulation import Regulation
 from services.qdrant_service import semantic_search
 from core.llm_factory import LLMFactory
 from langchain_core.prompts import ChatPromptTemplate
@@ -216,3 +221,61 @@ class AnalyticsService:
         logger.info(f"📋 Comprehensive Synthesis Complete - Status: {synthesis.get('overall_compliance_status')}")
         
         return synthesis
+    @staticmethod
+    async def get_global_risk_heatmap() -> Dict[str, Any]:
+        """
+        Calculates risk intensity and count for all jurisdictions for the last 30 days.
+        """
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        
+        async with SessionLocal() as db:
+            # Aggregate risk and counts by jurisdiction
+            query = (
+                select(
+                    Regulation.jurisdiction,
+                    func.count(Regulation.id).label("count"),
+                    func.avg(Regulation.risk_level).label("avg_risk")
+                )
+                .where(Regulation.created_at >= thirty_days_ago)
+                .group_by(Regulation.jurisdiction)
+            )
+            
+            result = await db.execute(query)
+            rows = result.all()
+            
+            heatmap = {}
+            jurisdiction_map = {
+                "USA": "US",
+                "United States": "US",
+                "US": "US",
+                "United Kingdom": "GB",
+                "UK": "GB",
+                "European Union": "EU",
+                "EU": "EU",
+                "India": "IN",
+                "Australia": "AU",
+                "Canada": "CA"
+            }
+            
+            for row in rows:
+                juris = row.jurisdiction or "Global"
+                iso_code = jurisdiction_map.get(juris, juris)
+                
+                # Normalize risk score (1-10) to intensity (0-1)
+                avg_risk = float(row.avg_risk or 0)
+                intensity = min(avg_risk / 10.0, 1.0)
+                
+                # Map colors based on risk
+                color = "#22c55e" # Green (Low)
+                if intensity > 0.7: color = "#ef4444" # Red (High)
+                elif intensity > 0.4: color = "#f59e0b" # Amber (Medium)
+                
+                heatmap[iso_code] = {
+                    "id": iso_code,
+                    "label": juris,
+                    "count": int(row.count),
+                    "intensity": intensity,
+                    "color": color
+                }
+            
+            return heatmap

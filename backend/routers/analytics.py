@@ -51,6 +51,14 @@ async def compare_document(filename: str):
         
     except HTTPException:
         raise
+@router.get("/risk-heatmap")
+async def get_risk_heatmap():
+    """
+    Returns aggregated risk data for the global heatmap (last 30 days).
+    """
+    try:
+        data = await AnalyticsService.get_global_risk_heatmap()
+        return data
     except Exception as e:
-        logger.error(f"Comparison failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to fetch risk heatmap: {e}")
+        raise HTTPException(status_code=500, detail="Failed to calculate global risk metrics.")

@@ -133,7 +133,8 @@ async def analyze_impact(
                 "policy_text": f"{policy_title}\n\n{policy_text}"[:6000], # Increased
             })
         except Exception as e:
-            if "429" in str(e) or "quota" in str(e).lower() or "resource_exhausted" in str(e).lower():
+            gemini_quota = "429" in str(e) or "quota" in str(e).lower() or "resource_exhausted" in str(e).lower()
+            if gemini_quota and LLMFactory.is_key_valid(settings.groq_api_key):
                 logger.warning(f"⚠️ Gemini Quota Exceeded. Falling back to Groq for Impact Analysis...")
                 fallback_llm = LLMFactory.get_llm(provider="groq", temperature=0.1)
                 chain = IMPACT_ANALYSIS_PROMPT | fallback_llm | StrOutputParser()
@@ -142,6 +143,9 @@ async def analyze_impact(
                     "regulation_text": f"{regulation_title}\n\n{regulation_text}"[:3000],
                     "policy_text": f"{policy_title}\n\n{policy_text}"[:2000],
                 })
+            elif gemini_quota:
+                logger.error("❌ Gemini Quota Exceeded and no valid Groq fallback found.")
+                raise RuntimeError("AI Quota Exceeded for Analysis.")
             else:
                 raise e
 

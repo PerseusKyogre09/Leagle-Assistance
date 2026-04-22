@@ -13,6 +13,7 @@ from core.database import create_tables
 from services.qdrant_service import ensure_collection_exists
 from routers import regulations, policies, impact, alerts, rag, upload, analytics, whatsapp
 from routers.public_api import router as public_api_router
+from core.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,8 +24,18 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up...")
     await create_tables()
     ensure_collection_exists()
+    
+    # Export tokens for external libraries
+    if settings.hf_token:
+        os.environ["HF_TOKEN"] = settings.hf_token
+        os.environ["HUGGING_FACE_HUB_TOKEN"] = settings.hf_token
+        
+    # Start background scheduler
+    start_scheduler()
+        
     logger.info("Infrastructure ready.")
     yield
+    stop_scheduler()
     logger.info("Shutting down...")
 
 

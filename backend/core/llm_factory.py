@@ -16,6 +16,17 @@ class LLMFactory:
     """
 
     @staticmethod
+    def is_key_valid(key: Optional[str]) -> bool:
+        """Checks if a key is non-empty and doesn't look like a placeholder."""
+        if not key or not isinstance(key, str):
+            return False
+        clean_key = key.strip()
+        # Basic check for empty or just 'None' string
+        if not clean_key or clean_key.lower() == "none" or len(clean_key) < 10:
+            return False
+        return True
+
+    @staticmethod
     def get_llm(provider: str = None, temperature: float = 0.0, max_tokens: Optional[int] = None) -> BaseChatModel:
         """
         Creates an LLM instance for a specific provider.
@@ -23,6 +34,11 @@ class LLMFactory:
         target_provider = provider or settings.llm_provider
         
         if target_provider == "groq":
+            if not LLMFactory.is_key_valid(settings.groq_api_key):
+                # If Groq is missing, fall back to whatever is next or raise a clear error
+                logger.error("❌ Groq API Key is missing or invalid. Check your environment variables.")
+                raise ValueError("Groq API Key not configured. Please add GROQ_API_KEY to your environment.")
+            
             return ChatGroq(
                 model_name="llama-3.3-70b-versatile",
                 groq_api_key=settings.groq_api_key,
@@ -40,6 +56,13 @@ class LLMFactory:
             )
 
         # Default to Gemini
+        if not LLMFactory.is_key_valid(settings.gemini_api_key):
+             logger.error("❌ Gemini API Key is missing or invalid.")
+             # If we have Groq, we could try falling back here, but usually, 
+             # the caller wants a specific provider if they called get_llm(provider=...)
+             if target_provider == "gemini":
+                 raise ValueError("Gemini API Key not configured.")
+        
         return ChatGoogleGenerativeAI(
             model=settings.llm_model,
             google_api_key=settings.gemini_api_key,

@@ -4,22 +4,38 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from core.config import settings
 from core.llm_factory import LLMFactory
-from services.risk_scorer import score_regulation
+from services.risk_scorer import risk_scorer
+from services.qdrant_service import semantic_search
 
 logger = logging.getLogger(__name__)
 
 INTEL_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", """You are a senior legal compliance AI. 
-Analyze the provided regulation and generate:
-1. A brief, executive explanation (3-4 sentences).
-2. A legal comparison: How this relates to global standards like GDPR, EU AI Act, or NIST.
-3. Impact areas for a corporate environment (IT, HR, Finance, etc.).
+    ("system", """You are a Senior Global Regulatory Intelligence Analyst.
+Analyze the provided regulation and provide a hard-hitting intelligence report.
 
-Format your response as a JSON object with keys: 'explanation', 'comparison', 'impact_areas' (list)."""),
-    ("human", """TITLE: {title}
-TEXT SNIPPET: {text}
+AUTHENTICITY RULES:
+1. **Explicit Jurisdiction**: State exactly where this regulation is from (mention Country/Region).
+2. **Real Comparisons**: Use the 'CROSS-JURISDICTIONAL CONTEXT' provided to draw specific parallels. 
+   - If Article 5 of GDPR is mentioned, compare it directly.
+   - If no specific legal parallels are found in context, focus on the operational impact for multinational companies.
+3. **No Fluff**: Do not say "it may relate to." Say "This aligns with..." or "This differs from..."
+4. **Impact Areas**: Identify exactly which departments (e.g., Legal, IT, HR, Finance) are affected.
+"""),
+    ("human", """
+JURISDICTION: {jurisdiction}
+REGULATION TITLE: {title}
+REGULATION TEXT: {text}
 
-Analyze this regulation:"""),
+CROSS-JURISDICTIONAL CONTEXT (Laws/Regulations from other regions):
+{context}
+
+Respond in JSON only:
+{
+  "explanation": "Brief context including origin and purpose.",
+  "comparison": "Evidence-based cross-reference with at least one global standard from the context.",
+  "impact_areas": ["List of affected areas"],
+  "risk_score": 1-10
+}"""),
 ])
 
 class RegulationIntelligenceService:
@@ -29,26 +45,45 @@ class RegulationIntelligenceService:
         return chain.ainvoke(input_data)
 
     @staticmethod
-    async def get_regulation_intel(title: str, text: str) -> Dict[str, Any]:
-        """
-        Generates deep intelligence for a regulation.
-        """
-        # 1. Local ML Risk Score
-        risk_score = score_regulation(text)
+    async def get_regulation_intel(title: str, text: str, jurisdiction: str = "Global") -> dict:
+        """Generates structured intelligence for a regulation."""
+        risk_score = risk_scorer.predict(text)
         
-        # 2. AI Intelligence (Explanation + Comparison)
+        # Perform cross-jurisdictional search
+        # Search for similar things in OTHER jurisdictions
+        similar_regs = semantic_search(
+            query_text=text[:1000], 
+            top_k=5, 
+            score_threshold=0.2,
+            source_type_filter="regulation"
+        )
+        
+        # Filter to prioritize other jurisdictions
+        other_juris_context = []
+        for reg in similar_regs:
+            reg_juris = reg.get("jurisdiction", "Unknown")
+            if reg_juris.lower() != jurisdiction.lower():
+                other_juris_context.append(
+                    f"Source: {reg.get('title')} ({reg_juris})\nContent: {reg.get('text')[:300]}"
+                )
+        
+        context_str = "\n---\n".join(other_juris_context) or "No direct jurisdictional parallels found in local database."
+        
         try:
             try:
                 llm = LLMFactory.get_llm(provider="gemini")
                 chain = INTEL_PROMPT | llm | StrOutputParser()
-                analysis_text = text[:5000]
                 logger.info(f"🧠 Generating Intelligence Profile for: {title[:50]}...")
                 raw_response = await chain.ainvoke({
                     "title": title,
-                    "text": analysis_text
+                    "text": text[:5000],
+                    "jurisdiction": jurisdiction,
+                    "context": context_str
                 })
             except Exception as gemini_err:
-                if "429" in str(gemini_err) or "quota" in str(gemini_err).lower() or "resource_exhausted" in str(gemini_err).lower():
+                gemini_quota = "429" in str(gemini_err) or "quota" in str(gemini_err).lower() or "resource_exhausted" in str(gemini_err).lower()
+                
+                if gemini_quota and LLMFactory.is_key_valid(settings.groq_api_key):
                     logger.warning(f"⚠️ Gemini Quota Exceeded. Falling back to Groq...")
                     llm = LLMFactory.get_llm(provider="groq")
                     chain = INTEL_PROMPT | llm | StrOutputParser()
@@ -56,6 +91,9 @@ class RegulationIntelligenceService:
                         "title": title,
                         "text": text[:5000]
                     })
+                elif gemini_quota:
+                     logger.error("❌ Gemini Quota Exceeded and no valid Groq fallback found.")
+                     raise RuntimeError("AI Quota Exceeded. Please configure a fallback provider or wait for reset.")
                 else:
                     raise gemini_err
             
@@ -67,9 +105,15 @@ class RegulationIntelligenceService:
             intel["risk_score"] = risk_score
             return intel
         except Exception as e:
-            logger.error(f"❌ Intelligence generation failed: {e}")
+            logger.error(f"❌ Intelligence generation failed after all attempts: {e}")
+            msg = "Detailed AI analysis temporarily unavailable"
+            if "quota" in str(e).lower() or "resource_exhausted" in str(e).lower():
+                msg = "AI Quota limit reached. Please wait a few minutes."
+            elif "Connection error" in str(e):
+                msg = "Connection error with AI provider. Check API Keys."
+            
             return {
-                "explanation": f"Regulatory document regarding {title}. Detailed AI analysis temporarily unavailable.",
+                "explanation": f"Regulatory document regarding {title}. {msg}.",
                 "comparison": "Cross-reference with global standards is pending neural synchronization.",
                 "impact_areas": ["General Compliance"],
                 "risk_score": risk_score

@@ -106,7 +106,8 @@ async def get_regulation_intel(regulation_id: str, db: AsyncSession = Depends(ge
     
     intel = await RegulationIntelligenceService.get_regulation_intel(
         title=regulation.title,
-        text=regulation.raw_text or regulation.title
+        text=regulation.raw_text or regulation.title,
+        jurisdiction=regulation.jurisdiction or "Global"
     )
     return intel
 

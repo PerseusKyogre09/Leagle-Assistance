@@ -30,7 +30,8 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     groq_api_key: str = ""
     llm_model: str = "gemini-2.0-flash" 
-    llm_provider: str = "groq"  # "gemini" or "groq"
+    llm_provider: str = "gemini"  # "gemini" or "groq"
+    hf_token: str = ""
     
     # App
     secret_key: str = "your-secret-key-change-in-production"
