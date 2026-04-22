@@ -50,7 +50,7 @@ async def sync_australia_regulations(db: AsyncSession, limit: int = 10):
                 text=entry.summary if hasattr(entry, 'summary') else entry.title,
                 source=entry.link,
                 category="Legislative Instrument",
-                jurisdiction="Australia",
+                jurisdiction="AU",
                 effective_date=pub_date
             )
             if regulation:

@@ -6,6 +6,15 @@ import { getRegulations, getAvailableJurisdictions } from '../api/client'
 import { Search, Tag, Clock, ArrowUpRight, ChevronRight, Filter, Globe, ChevronDown } from 'lucide-react'
 import RegulationDetail from './RegulationDetail'
 
+const JURISDICTION_LABELS = {
+    'IN': 'India (Bharat)',
+    'US': 'United States (Federal)',
+    'UK': 'United Kingdom',
+    'GB': 'United Kingdom',
+    'AU': 'Australia',
+    'EU': 'European Union'
+}
+
 function RegulationListContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -16,7 +25,7 @@ function RegulationListContent() {
     const [search, setSearch] = useState('')
     const [selectedReg, setSelectedReg] = useState(null)
 
-    // Parse URL params
+    // Handle incoming URL parameters (e.g. from Map click)
     useEffect(() => {
         const juris = searchParams.get('jurisdiction')
         if (juris) {
@@ -24,12 +33,13 @@ function RegulationListContent() {
         }
     }, [searchParams])
 
-    // Load Data
+    // Load Data: Aggressive synchronization with normalized codes
     useEffect(() => {
         async function loadData() {
             setLoading(true)
             try {
                 const juris = searchParams.get('jurisdiction')
+                // Always fetch a broad set, but use backend filtering if requested
                 const [regRes, jurisRes] = await Promise.all([
                     getRegulations(juris ? { jurisdiction: juris.toUpperCase() } : {}),
                     getAvailableJurisdictions()
@@ -37,7 +47,7 @@ function RegulationListContent() {
                 setRegulations(regRes.data || [])
                 setJurisdictions(jurisRes.data || [])
             } catch (err) {
-                console.error('Data sync failure', err)
+                console.error('Portfolio synchronization failure', err)
             } finally {
                 setLoading(false)
             }
@@ -53,17 +63,36 @@ function RegulationListContent() {
         const isShortTerm = term.length <= 2
 
         return regulations.filter(r => {
-            const jurisdictionMatch = r.jurisdiction?.toLowerCase().includes(termLower)
+            const rJuris = (r.jurisdiction || '').toLowerCase()
+            const rTitle = (r.title || '').toLowerCase()
 
+            // 1. Strict Jurisdictional Matching (Standardized + Fuzzy Name Mapping)
+            let jurisdictionMatch = rJuris.includes(termLower)
+
+            // Fuzzy mapping for common country names to ISO codes
+            const COUNTRY_MAP = {
+                'india': 'in', 'bharat': 'in',
+                'usa': 'us', 'united states': 'us',
+                'uk': 'uk', 'united kingdom': 'uk', 'britain': 'uk',
+                'australia': 'au', 'europe': 'eu', 'european union': 'eu'
+            }
+            if (!jurisdictionMatch && COUNTRY_MAP[termLower] === rJuris) {
+                jurisdictionMatch = true
+            }
+
+            // 2. Precise Title Matching
             let titleMatch = false
             if (isShortTerm) {
+                // Word boundary to avoid "IN" matching "Influenza"
                 const regex = new RegExp(`\\b${term}\\b`, 'i')
                 titleMatch = regex.test(r.title || '')
             } else {
-                titleMatch = r.title?.toLowerCase().includes(termLower)
+                titleMatch = rTitle.includes(termLower)
             }
 
+            // 3. Category matching
             const categoryMatch = r.category?.toLowerCase() === termLower
+
             return titleMatch || jurisdictionMatch || categoryMatch
         })
     }, [regulations, search])
@@ -73,15 +102,16 @@ function RegulationListContent() {
             setSearch('')
             router.push('/regulations')
         } else {
-            setSearch(id)
-            router.push(`/regulations?jurisdiction=${id}`)
+            const standardCode = id.toUpperCase()
+            setSearch(standardCode)
+            router.push(`/regulations?jurisdiction=${standardCode}`)
         }
     }
 
     if (loading && regulations.length === 0) return (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-            <div className="w-12 h-12 border-4 border-leagle-accent border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-500 font-bold tracking-[0.3em] uppercase text-[10px]">Synchronizing Portfolio Intelligence...</p>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-6">
+            <div className="w-16 h-16 border-2 border-leagle-accent border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-500 font-bold tracking-[0.4em] uppercase text-[10px] animate-pulse">Syncing Global Intelligence Layer...</p>
         </div>
     )
 
@@ -92,32 +122,34 @@ function RegulationListContent() {
                     <div className="space-y-2">
                         <h2 className="text-5xl font-serif text-white tracking-tight italic">Jurisdictional Library</h2>
                         <div className="flex items-center gap-4 text-gray-500 font-medium uppercase text-[10px] tracking-widest">
-                            <span>{filtered.length} Displayed Neurons</span>
-                            <span className="w-1 h-1 rounded-full bg-slate-700" />
-                            <span>Portfolio Depth: {regulations.length}</span>
+                            <span className="text-leagle-accent">{filtered.length} Local matches</span>
+                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                            <span>Portfolio Mass: {regulations.length} Records</span>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="relative group/select">
-                            <Globe size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-leagle-accent pointer-events-none" />
+                            <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-leagle-accent/60 pointer-events-none group-focus-within/select:text-leagle-accent transition-colors" />
                             <select
-                                className="pl-9 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-sm text-[10px] font-black uppercase tracking-widest text-white appearance-none hover:border-leagle-accent transition-all cursor-pointer outline-none"
+                                className="pl-11 pr-12 py-3 bg-[#0a0a0a] border border-white/10 rounded-sm text-[11px] font-black uppercase tracking-widest text-white appearance-none hover:border-leagle-accent transition-all cursor-pointer outline-none ring-1 ring-transparent focus:ring-leagle-accent/20"
                                 value={searchParams.get('jurisdiction') || 'all'}
                                 onChange={(e) => handleJurisdictionChange(e.target.value)}
                             >
                                 <option value="all">Global Oversight (All Regions)</option>
                                 {jurisdictions.map(j => (
-                                    <option key={j.id} value={j.id}>{j.id} (Market Mass: {j.count})</option>
+                                    <option key={j.id} value={j.id}>
+                                        {(JURISDICTION_LABELS[j.id] || j.id).toUpperCase()} ({j.count})
+                                    </option>
                                 ))}
                             </select>
-                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover/select:text-leagle-accent pointer-events-none transition-colors" />
+                            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 group-hover/select:text-leagle-accent pointer-events-none transition-colors" />
                         </div>
 
                         {search && (
-                            <div className="flex items-center gap-2 px-3 py-2 bg-leagle-accent/10 border border-leagle-accent/20 rounded-sm animate-in fade-in zoom-in duration-300">
+                            <div className="flex items-center gap-3 px-4 py-3 bg-leagle-accent/10 border border-leagle-accent/20 rounded-sm animate-in fade-in zoom-in duration-300">
                                 <Filter size={10} className="text-leagle-accent" />
-                                <span className="text-[9px] font-black text-leagle-accent uppercase tracking-widest">Active: {search}</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{search}</span>
                                 <button onClick={() => handleJurisdictionChange('all')} className="ml-2 hover:text-white text-leagle-accent/60 transition-colors">
                                     <ArrowUpRight size={10} className="rotate-45" />
                                 </button>
@@ -126,64 +158,64 @@ function RegulationListContent() {
                     </div>
                 </div>
 
-                <div className="relative w-full lg:w-[400px] group">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-leagle-accent transition-colors" size={18} />
+                <div className="relative w-full lg:w-[450px] group">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-leagle-accent transition-colors" size={20} />
                     <input
                         type="search"
-                        placeholder="Neural portfolio search..."
-                        className="w-full pl-14 pr-8 py-4 bg-white/2 border border-white/5 rounded-sm text-gray-200 placeholder-gray-600 focus:border-leagle-accent transition-all outline-none text-sm"
+                        placeholder="Search regulation titles..."
+                        className="w-full pl-16 pr-10 py-5 bg-[#0a0a0a] border border-white/10 rounded-sm text-gray-200 placeholder-gray-700 focus:border-leagle-accent transition-all outline-none text-base"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-px bg-white/5 border border-white/5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-px bg-white/5 border border-white/5 shadow-2xl">
                 {filtered.map((reg) => (
                     <div
                         key={reg.id}
                         onClick={() => setSelectedReg(reg)}
-                        className="bg-[#050505] p-10 group hover:bg-white/[0.02] transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-full border-transparent hover:border-leagle-accent/20 ring-1 ring-white/5 hover:ring-leagle-accent/10"
+                        className="bg-leagle-bg p-12 group hover:bg-white/[0.03] transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-full border-b border-r border-white/5 hover:z-10"
                     >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-leagle-accent/10 to-transparent flex items-center justify-center translate-x-12 -translate-y-12 group-hover:translate-x-8 group-hover:-translate-y-8 transition-transform">
-                            <ArrowUpRight className="text-leagle-accent opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-leagle-accent/15 to-transparent flex items-center justify-center translate-x-16 -translate-y-16 group-hover:translate-x-12 group-hover:-translate-y-12 transition-transform duration-500">
+                            <ArrowUpRight className="text-leagle-accent opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
                         </div>
 
-                        <div className="space-y-7">
-                            <div className="flex items-center gap-3">
-                                <span className={`px-2.5 py-1 rounded-sm text-[9px] font-black uppercase tracking-[0.3em] shadow-sm ${reg.jurisdiction === 'UK' || reg.jurisdiction === 'GB'
-                                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                    : 'bg-leagle-accent/10 text-leagle-accent border border-leagle-accent/20'
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-4">
+                                <span className={`px-3 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-[0.4em] shadow-lg ${reg.jurisdiction === 'UK' || reg.jurisdiction === 'GB'
+                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                                    : 'bg-leagle-accent/20 text-leagle-accent border border-leagle-accent/30'
                                     }`}>
                                     {reg.jurisdiction || 'Global'}
                                 </span>
-                                <span className="px-2.5 py-1 bg-white/2 border border-white/5 text-gray-500 rounded-sm text-[9px] font-black uppercase tracking-[0.3em]">
+                                <span className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 rounded-sm text-[10px] font-black uppercase tracking-[0.4em]">
                                     {reg.category || 'General'}
                                 </span>
                             </div>
 
-                            <h3 className="text-2xl font-serif text-white group-hover:text-leagle-accent transition-colors leading-tight italic">
+                            <h3 className="text-2xl font-serif text-white group-hover:text-leagle-accent transition-colors leading-tight italic tracking-wide">
                                 {reg.title}
                             </h3>
 
-                            <p className="text-sm text-gray-500 font-medium line-clamp-2 italic leading-relaxed">
-                                {reg.raw_text?.slice(0, 200)}...
+                            <p className="text-base text-gray-500 font-medium line-clamp-3 italic leading-relaxed opacity-80">
+                                {reg.raw_text?.slice(0, 250)}...
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-10 border-t border-white/5 mt-10">
-                            <div className="flex items-center gap-8">
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-600">
-                                    <Tag size={12} className="text-leagle-accent/40" />
+                        <div className="flex items-center justify-between pt-12 border-t border-white/5 mt-12 bg-gradient-to-t from-black/20 to-transparent p-2 -m-2">
+                            <div className="flex items-center gap-10">
+                                <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-gray-600 group-hover:text-gray-400 transition-colors">
+                                    <Tag size={14} className="text-leagle-accent/40" />
                                     {reg.id.slice(0, 8)}
                                 </div>
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-600">
-                                    <Clock size={12} className="text-leagle-accent/40" />
+                                <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-gray-600 group-hover:text-gray-400 transition-colors">
+                                    <Clock size={14} className="text-leagle-accent/40" />
                                     {new Date(reg.created_at).toLocaleDateString()}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-leagle-accent font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                Evaluate Neuron <ChevronRight size={14} />
+                            <div className="flex items-center gap-3 text-leagle-accent font-black text-[11px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-8 group-hover:translate-x-0">
+                                Deep Analysis <ChevronRight size={18} />
                             </div>
                         </div>
                     </div>
@@ -198,12 +230,21 @@ function RegulationListContent() {
             )}
 
             {filtered.length === 0 && (
-                <div className="glass-card py-40 text-center space-y-6 bg-white/2 border-white/5">
-                    <Search size={54} className="mx-auto text-leagle-accent/20 animate-pulse" />
-                    <div className="space-y-2">
-                        <p className="text-2xl font-black text-white italic">Zero Matches in Sector</p>
-                        <p className="text-gray-500 font-medium max-w-sm mx-auto text-sm italic leading-relaxed">The selected jurisdiction currently has no active parallels synced. Adjust global overview or trigger a deep-sector sync.</p>
+                <div className="glass-card py-56 text-center space-y-8 bg-[#0a0a0a] border-white/5">
+                    <Search size={64} className="mx-auto text-leagle-accent/10 animate-pulse" />
+                    <div className="space-y-4">
+                        <p className="text-3xl font-serif text-white italic tracking-widest">No Matches Identified</p>
+                        <p className="text-gray-600 font-medium max-w-md mx-auto text-sm italic leading-relaxed uppercase tracking-tighter">
+                            The current neural snapshot for <span className="text-leagle-accent">{search}</span> is empty.
+                            Standardized synchronization or manual ingestion required.
+                        </p>
                     </div>
+                    <button
+                        onClick={() => handleJurisdictionChange('all')}
+                        className="px-8 py-4 bg-white/5 hover:bg-leagle-accent/10 border border-white/10 hover:border-leagle-accent/30 text-white text-[10px] font-black uppercase tracking-[0.4em] transition-all"
+                    >
+                        Reset Global Oversight
+                    </button>
                 </div>
             )}
         </div>
@@ -212,7 +253,7 @@ function RegulationListContent() {
 
 export default function RegulationList() {
     return (
-        <Suspense fallback={<div>Loading Library...</div>}>
+        <Suspense fallback={<div>Loading Neural Library...</div>}>
             <RegulationListContent />
         </Suspense>
     )

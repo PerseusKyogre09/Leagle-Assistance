@@ -9,7 +9,7 @@ from services.australia_legis_service import sync_australia_regulations
 
 logger = logging.getLogger(__name__)
 
-async def sync_all_jurisdictions(db: AsyncSession, limit_per_source: int = 10):
+async def sync_all_jurisdictions(db: AsyncSession, limit_per_source: int = 100):
     """
     Coordinates synchronization across all supported legal jurisdictions.
     """

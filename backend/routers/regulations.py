@@ -101,7 +101,8 @@ async def list_regulations(
     return [
         {
             "id": str(r.id), "title": r.title, "source": r.source,
-            "category": r.category, "risk_level": r.risk_level,
+            "category": r.category, "jurisdiction": r.jurisdiction,
+            "risk_level": r.risk_level,
             "created_at": r.created_at.isoformat(),
         }
         for r in regulations
