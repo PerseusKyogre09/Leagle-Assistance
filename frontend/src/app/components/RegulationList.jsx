@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getRegulations } from '../api/client'
-import { Search, Tag, Clock, ArrowUpRight, ChevronRight } from 'lucide-react'
+import { Search, Tag, Clock, ArrowUpRight, ChevronRight, Filter } from 'lucide-react'
 import RegulationDetail from './RegulationDetail'
 
 function RegulationListContent() {
@@ -13,10 +13,11 @@ function RegulationListContent() {
     const [search, setSearch] = useState('')
     const [selectedReg, setSelectedReg] = useState(null)
 
+    // Sync search input with URL params on mount/change
     useEffect(() => {
         const jurisdiction = searchParams.get('jurisdiction')
         if (jurisdiction) {
-            setSearch(jurisdiction)
+            setSearch(jurisdiction.toUpperCase())
         }
     }, [searchParams])
 
@@ -24,7 +25,7 @@ function RegulationListContent() {
         async function fetchRegs() {
             try {
                 const { data } = await getRegulations()
-                setRegulations(data)
+                setRegulations(data || [])
             } catch (err) {
                 console.error('Error fetching regulations', err)
             } finally {
@@ -34,11 +35,20 @@ function RegulationListContent() {
         fetchRegs()
     }, [])
 
-    const filtered = regulations.filter(r =>
-    (r.title?.toLowerCase().includes(search.toLowerCase()) ||
-        r.jurisdiction?.toLowerCase().includes(search.toLowerCase()) ||
-        (r.category?.toLowerCase() === search.toLowerCase()))
-    )
+    // Memoize the filtered list for stability
+    const filtered = useMemo(() => {
+        if (!search) return regulations
+
+        const term = search.toLowerCase()
+        return regulations.filter(r => {
+            const titleMatch = r.title?.toLowerCase().includes(term)
+            const jurisdictionMatch = r.jurisdiction?.toLowerCase().includes(term)
+            const idMatch = r.id?.toLowerCase().includes(term)
+            const categoryMatch = r.category?.toLowerCase() === term
+
+            return titleMatch || jurisdictionMatch || idMatch || categoryMatch
+        })
+    }, [regulations, search])
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-4">
@@ -50,9 +60,22 @@ function RegulationListContent() {
     return (
         <div className="max-w-7xl mx-auto space-y-10">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-                <div className="space-y-2">
-                    <h2 className="text-4xl font-serif text-white tracking-tight italic">Jurisdictional Library</h2>
-                    <p className="text-gray-500 font-medium uppercase text-[10px] tracking-widest">{regulations.length} Records in Portfolio</p>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <h2 className="text-4xl font-serif text-white tracking-tight italic">Jurisdictional Library</h2>
+                        <p className="text-gray-500 font-medium uppercase text-[10px] tracking-widest leading-none">
+                            {filtered.length} of {regulations.length} Records in Portfolio
+                        </p>
+                    </div>
+                    {search && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-leagle-accent/10 border border-leagle-accent/20 rounded-sm w-fit animate-in fade-in slide-in-from-left-2 duration-300">
+                            <Filter size={10} className="text-leagle-accent" />
+                            <span className="text-[9px] font-black text-leagle-accent uppercase tracking-widest">Active Filter: {search}</span>
+                            <button onClick={() => setSearch('')} className="ml-2 hover:text-white text-leagle-accent/60 transition-colors">
+                                <ArrowUpRight size={10} className="rotate-45" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative w-full lg:w-[450px] group">
@@ -74,7 +97,6 @@ function RegulationListContent() {
                         onClick={() => setSelectedReg(reg)}
                         className="glass-card p-8 group hover:bg-white/[0.02] transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-full border-white/5 hover:border-leagle-accent/20 rounded-sm"
                     >
-                        {/* Interactive Background Element */}
                         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-leagle-accent/10 to-transparent flex items-center justify-center translate-x-12 -translate-y-12 group-hover:translate-x-8 group-hover:-translate-y-8 transition-transform">
                             <ArrowUpRight className="text-leagle-accent opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
                         </div>
