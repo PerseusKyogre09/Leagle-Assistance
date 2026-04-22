@@ -13,7 +13,6 @@ function RegulationListContent() {
     const [search, setSearch] = useState('')
     const [selectedReg, setSelectedReg] = useState(null)
 
-    // Sync search input with URL params on mount/change
     useEffect(() => {
         const jurisdiction = searchParams.get('jurisdiction')
         if (jurisdiction) {
@@ -23,8 +22,11 @@ function RegulationListContent() {
 
     useEffect(() => {
         async function fetchRegs() {
+            setLoading(true)
             try {
-                const { data } = await getRegulations()
+                const jurisdiction = searchParams.get('jurisdiction')
+                const params = jurisdiction ? { jurisdiction: jurisdiction.toUpperCase() } : {}
+                const { data } = await getRegulations(params)
                 setRegulations(data || [])
             } catch (err) {
                 console.error('Error fetching regulations', err)
@@ -33,27 +35,39 @@ function RegulationListContent() {
             }
         }
         fetchRegs()
-    }, [])
+    }, [searchParams])
 
-    // Memoize the filtered list for stability
     const filtered = useMemo(() => {
         if (!search) return regulations
 
-        const term = search.toLowerCase()
-        return regulations.filter(r => {
-            const titleMatch = r.title?.toLowerCase().includes(term)
-            const jurisdictionMatch = r.jurisdiction?.toLowerCase().includes(term)
-            const idMatch = r.id?.toLowerCase().includes(term)
-            const categoryMatch = r.category?.toLowerCase() === term
+        const term = search.trim()
+        const termLower = term.toLowerCase()
 
-            return titleMatch || jurisdictionMatch || idMatch || categoryMatch
+        return regulations.filter(r => {
+            // Precise matching for 2-letter ISO codes (e.g. "IN" shouldn't match "Influenza")
+            const isShortTerm = term.length <= 2
+
+            const jurisdictionMatch = r.jurisdiction?.toLowerCase().includes(termLower)
+
+            let titleMatch = false
+            if (isShortTerm) {
+                // Use word boundary for short terms to avoid interior substring noise
+                const regex = new RegExp(`\\b${term}\\b`, 'i')
+                titleMatch = regex.test(r.title || '')
+            } else {
+                titleMatch = r.title?.toLowerCase().includes(termLower)
+            }
+
+            const categoryMatch = r.category?.toLowerCase() === termLower
+
+            return titleMatch || jurisdictionMatch || categoryMatch
         })
     }, [regulations, search])
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-4">
             <div className="w-10 h-10 border-4 border-leagle-accent border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-500 font-bold tracking-widest uppercase text-[10px]">Loading regulation library...</p>
+            <p className="text-gray-500 font-bold tracking-widest uppercase text-[10px]">Loading target intelligence...</p>
         </div>
     )
 
@@ -70,7 +84,7 @@ function RegulationListContent() {
                     {search && (
                         <div className="flex items-center gap-2 px-3 py-1 bg-leagle-accent/10 border border-leagle-accent/20 rounded-sm w-fit animate-in fade-in slide-in-from-left-2 duration-300">
                             <Filter size={10} className="text-leagle-accent" />
-                            <span className="text-[9px] font-black text-leagle-accent uppercase tracking-widest">Active Filter: {search}</span>
+                            <span className="text-[9px] font-black text-leagle-accent uppercase tracking-widest">Active Focus: {search}</span>
                             <button onClick={() => setSearch('')} className="ml-2 hover:text-white text-leagle-accent/60 transition-colors">
                                 <ArrowUpRight size={10} className="rotate-45" />
                             </button>
@@ -82,7 +96,7 @@ function RegulationListContent() {
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-leagle-accent transition-colors" size={20} />
                     <input
                         type="search"
-                        placeholder="Filter by jurisdiction or title..."
+                        placeholder="Search portfolio..."
                         className="w-full pl-14 pr-8 py-5 bg-white/2 border border-white/5 rounded-sm text-gray-200 placeholder-gray-600 focus:border-leagle-accent transition-all outline-none"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -90,12 +104,12 @@ function RegulationListContent() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-px bg-white/5 border border-white/5">
                 {filtered.map((reg) => (
                     <div
                         key={reg.id}
                         onClick={() => setSelectedReg(reg)}
-                        className="glass-card p-8 group hover:bg-white/[0.02] transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-full border-white/5 hover:border-leagle-accent/20 rounded-sm"
+                        className="bg-leagle-bg p-8 group hover:bg-white/[0.02] transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-full border-transparent hover:border-leagle-accent/20"
                     >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-leagle-accent/10 to-transparent flex items-center justify-center translate-x-12 -translate-y-12 group-hover:translate-x-8 group-hover:-translate-y-8 transition-transform">
                             <ArrowUpRight className="text-leagle-accent opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
@@ -150,11 +164,11 @@ function RegulationListContent() {
             )}
 
             {filtered.length === 0 && (
-                <div className="glass-card py-32 text-center space-y-4">
+                <div className="glass-card py-32 text-center space-y-4 bg-white/2 border-white/5">
                     <Search size={44} className="mx-auto text-leagle-accent/40" />
                     <div className="space-y-1">
-                        <p className="text-xl font-black text-white">No Matching Regulations</p>
-                        <p className="text-gray-500 font-medium max-w-xs mx-auto text-sm">Adjust your search terms or sync new source data.</p>
+                        <p className="text-xl font-black text-white">No Matching Records</p>
+                        <p className="text-gray-500 font-medium max-w-xs mx-auto text-sm italic">Adjust focus or initiate manual neural sync.</p>
                     </div>
                 </div>
             )}

@@ -8,7 +8,7 @@ const api = axios.create({
 })
 
 // Regulations
-export const getRegulations = () => api.get('/regulations/')
+export const getRegulations = (params = {}) => api.get('/regulations/', { params })
 export const ingestRegulation = (data) => api.post('/regulations/ingest', data)
 export const uploadRegulationPDF = (formData) =>
     api.post('/regulations/upload-pdf', formData, {
