@@ -1,5 +1,6 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import QueryProvider from './components/QueryProvider'
+import WebSocketInitializer from './components/WebSocketInitializer'
 import './globals.css'
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
                 </head>
                 <body className="antialiased min-h-screen selection:bg-leagle-accent/30 cm-shell-bg">
                     <QueryProvider>
+                        <WebSocketInitializer />
                         {children}
                     </QueryProvider>
                 </body>

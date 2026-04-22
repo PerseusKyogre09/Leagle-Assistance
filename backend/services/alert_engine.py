@@ -49,18 +49,16 @@ async def run_impact_analysis(
     mappings_created = []
 
     for policy_id_str, result in seen_policy_ids.items():
-        score = result["score"]
+        similarity = result["score"]
         
-        # Priority-Aware Risk Logic
-        # If the regulation is high risk (>70) or priority, we boost the impact level
-        is_high_risk_reg = regulation.risk_level and regulation.risk_level > 70
-        
-        if score >= SIMILARITY_THRESHOLDS["HIGH"] or (score >= 0.55 and is_high_risk_reg):
-            impact_level = "HIGH"
-        elif score >= SIMILARITY_THRESHOLDS["MEDIUM"] or (score >= 0.35 and is_high_risk_reg):
-            impact_level = "MEDIUM"
-        else:
-            impact_level = "LOW"
+        # Calculate Combined Intelligence Score (0-100)
+        # We weigh content similarity (impact) and inherent regulation risk
+        reg_risk = regulation.risk_level or 0
+        intelligence_score = int((similarity * 70) + (reg_risk * 0.3))
+        intelligence_score = max(0, min(100, intelligence_score))
+
+        # Harmonize severity with the combined score using standard risk thresholds
+        impact_level = score_to_level(intelligence_score)
 
         # Verify policy exists in SQL before mapping
         pol_check = await db.execute(select(Policy).where(Policy.id == policy_id_str))
@@ -81,7 +79,7 @@ async def run_impact_analysis(
         mapping = ImpactMapping(
             regulation_id=regulation.id,
             policy_id=policy_id_str,
-            similarity=score,
+            similarity=similarity,
             impact_level=impact_level,
             status="OPEN",
         )
@@ -95,9 +93,9 @@ async def run_impact_analysis(
                 severity=impact_level,
                 title=f"New Compliance Risk: {regulation.title}",
                 message=(
-                    f"{impact_level} impact detected: Regulation '{regulation.title}' "
-                    f"affects policy (similarity: {score:.2f}). "
-                    f"Risk score: {regulation.risk_level}/100."
+                    f"{impact_level} impact detected: '{regulation.title}' "
+                    f"matches policy profile (correlation: {similarity:.2f}). "
+                    f"Intelligence Score: {intelligence_score}/100."
                 ),
             )
             db.add(alert)

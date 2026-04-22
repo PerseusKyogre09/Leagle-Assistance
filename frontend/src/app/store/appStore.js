@@ -5,10 +5,21 @@ export const useAppStore = create((set) => ({
     unreadCount: 0,
     connected: false,
     addAlerts: (newAlerts) =>
-        set((state) => ({
-            alerts: [...newAlerts, ...state.alerts].slice(0, 100),
-            unreadCount: state.unreadCount + newAlerts.length,
-        })),
+        set((state) => {
+            const combined = [...newAlerts, ...state.alerts]
+            const unique = combined.reduce((acc, current) => {
+                const x = acc.find(item => item.id === current.id);
+                if (!x) {
+                    return acc.concat([current]);
+                } else {
+                    return acc;
+                }
+            }, []);
+            return {
+                alerts: unique.slice(0, 100),
+                unreadCount: state.unreadCount + newAlerts.length,
+            }
+        }),
     setAlerts: (initialAlerts) =>
         set({
             alerts: initialAlerts,

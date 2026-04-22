@@ -58,7 +58,7 @@ async def root():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=["http://localhost:3000", "https://leagle.pradeepto.qzz.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

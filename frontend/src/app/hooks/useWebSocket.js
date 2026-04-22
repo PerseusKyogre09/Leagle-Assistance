@@ -19,8 +19,9 @@ export function useWebSocket() {
         }
         fetchInitial()
 
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        const wsUrl = API_BASE_URL.replace('http', 'ws') + '/api/alerts/ws'
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+        const wsUrl = API_BASE_URL.replace(/^http/, 'ws') + '/api/alerts/ws'
+        console.log('📡 Attempting WebSocket Connection:', wsUrl)
 
         // Connect to Raw WebSocket gateway
         const socket = new WebSocket(wsUrl)
@@ -42,8 +43,12 @@ export function useWebSocket() {
             }
         }
 
-        socket.onclose = () => {
-            console.log('❌ Disconnected from Feed')
+        socket.onerror = (error) => {
+            console.error('❌ WebSocket Handshake Error:', error)
+        }
+
+        socket.onclose = (event) => {
+            console.log('❌ Disconnected from Feed:', event.reason)
             setConnected(false)
         }
 
