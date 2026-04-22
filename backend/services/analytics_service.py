@@ -277,5 +277,46 @@ class AnalyticsService:
                     "intensity": intensity,
                     "color": color
                 }
+
+            # Generate connection arcs based on shared categories/topics
+            connections = []
+            category_query = (
+                select(Regulation.category, Regulation.jurisdiction)
+                .where(Regulation.created_at >= thirty_days_ago)
+                .group_by(Regulation.category, Regulation.jurisdiction)
+            )
+            cat_results = await db.execute(category_query)
+            cat_rows = cat_results.all()
             
-            return heatmap
+            # Group by category
+            by_cat = {}
+            for row in cat_rows:
+                if row.category not in by_cat: by_cat[row.category] = []
+                iso = jurisdiction_map.get(row.jurisdiction, row.jurisdiction)
+                if iso not in by_cat[row.category]:
+                    by_cat[row.category].append(iso)
+            
+            # Create connections between jurisdictions sharing same categories
+            seen_pairs = set()
+            for cat, isos in by_cat.items():
+                if len(isos) > 1:
+                    for i in range(len(isos)):
+                        for j in range(i + 1, len(isos)):
+                            pair = tuple(sorted([isos[i], isos[j]]))
+                            if pair not in seen_pairs:
+                                connections.append({
+                                    "startId": isos[i],
+                                    "endId": isos[j],
+                                    "label": cat.replace("_", " ").title()
+                                })
+                                seen_pairs.add(pair)
+
+            return {
+                "heatmap": heatmap,
+                "connections": connections,
+                "summary": {
+                    "total_events": sum(v["count"] for v in heatmap.values()),
+                    "active_sectors": len(by_cat),
+                    "cross_border_parallels": len(connections)
+                }
+            }
