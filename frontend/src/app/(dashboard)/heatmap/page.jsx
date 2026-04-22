@@ -2,81 +2,75 @@
 
 import React from 'react'
 import NeuralIntelligenceMap from '../../components/NeuralIntelligenceMap'
-import { ShieldAlert, Globe, ArrowUpRight, Info, Maximize2, Layers } from 'lucide-react'
+import { ShieldAlert, Globe, Activity, Info, Maximize2, Layers, AlertTriangle } from 'lucide-react'
 
 export default function HeatmapPage() {
     return (
-        <div className="relative h-[calc(100vh-100px)] overflow-hidden animate-in fade-in duration-1000">
+        <div className="relative h-[calc(100vh-100px)] overflow-hidden animate-in fade-in duration-700 bg-leagle-bg">
 
-            {/* Background Grid Pattern */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none" />
+            {/* Background Texture */}
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none" />
 
-            {/* Dynamic Header Overlay */}
-            <div className="absolute top-6 left-10 z-30 flex items-center gap-10">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-10 bg-leagle-accent rounded-full border border-leagle-accent/40 shadow-glow" />
-                        <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Neural Intelligence Center</h1>
-                    </div>
-                    <div className="flex items-center gap-2 ml-5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Regional Parallels Sync: <span className="text-emerald-500">Live</span></p>
-                    </div>
+            {/* Institutional Header */}
+            <div className="absolute top-8 left-10 z-30 space-y-1">
+                <div className="flex items-center gap-4">
+                    <div className="w-1.5 h-12 bg-white shadow-glow" />
+                    <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Global Intelligence Hub</h1>
                 </div>
-
-                <div className="h-12 w-px bg-white/10 hidden md:block" />
-
-                <div className="hidden lg:flex gap-8">
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Active Monitored Protocols</span>
-                        <span className="text-xl font-bold text-white leading-tight">V3.1.2026</span>
+                <div className="flex items-center gap-4 ml-6 uppercase tracking-[0.4em] font-black text-[9px]">
+                    <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 shadow-glow animate-pulse" />
+                        <span className="text-emerald-500">Neural Sync: Active</span>
                     </div>
-                    <div className="flex flex-col text-right">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Intelligence Fidelity</span>
-                        <span className="text-xl font-bold text-leagle-accent leading-tight">99.4%</span>
-                    </div>
+                    <div className="w-px h-2 bg-white/20" />
+                    <span className="text-slate-500">Directorate: Global Oversight</span>
                 </div>
             </div>
 
-            {/* Main Command Map */}
-            <div className="w-full h-full p-2">
+            {/* Main Map Visualizer */}
+            <div className="w-full h-full">
                 <NeuralIntelligenceMap />
             </div>
 
-            {/* Side HUD: Regional Breakdown (Floating) */}
-            <div className="absolute top-1/2 right-10 -translate-y-1/2 z-30 hidden xl:flex flex-col gap-6">
-                <div className="bg-black/40 backdrop-blur-3xl p-8 rounded-[3rem] border border-white/5 w-[320px] transition-all hover:border-leagle-accent/20 group">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Regional Volatility</h3>
-                        <Maximize2 size={14} className="text-slate-600 group-hover:text-white transition-colors" />
+            {/* Side HUD: Metric Overlays (Right) */}
+            <div className="absolute top-1/2 right-10 -translate-y-1/2 z-30 space-y-6 hidden xl:block">
+                <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-10 min-w-[340px] shadow-heavy">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-8 flex justify-between items-center">
+                        Regional Volatility
+                        <Maximize2 size={12} className="text-slate-700" />
+                    </h3>
+
+                    <div className="space-y-8">
+                        <RegionStripe label="European Union" risk="Critical" perc={82} color="#f87171" />
+                        <RegionStripe label="United States" risk="Elevated" perc={54} color="#fbbf24" />
+                        <RegionStripe label="Asia Pacific" risk="Stable" perc={31} color="#34d399" />
+                        <RegionStripe label="United Kingdom" risk="Moderate" perc={47} color="#fbbf24" />
                     </div>
 
-                    <div className="space-y-6">
-                        <RegionStripe label="European Union" risk="High" perc={78} color="#ef4444" />
-                        <RegionStripe label="United States" risk="Medium" perc={45} color="#f59e0b" />
-                        <RegionStripe label="United Kingdom" risk="Low" perc={22} color="#22c55e" />
-                        <RegionStripe label="Asia Pacific" risk="Medium" perc={56} color="#f59e0b" />
+                    <div className="mt-12 pt-8 border-t border-white/5 space-y-4">
+                        <div className="flex items-center gap-3 p-4 bg-red-500/5 border border-red-500/20">
+                            <AlertTriangle className="text-red-500" size={16} />
+                            <div>
+                                <p className="text-[9px] font-black text-red-500 uppercase tracking-widest leading-none">Critical Parallel</p>
+                                <p className="text-[10px] text-slate-400 font-medium mt-1">GDPR v2 Drift Detected in AU</p>
+                            </div>
+                        </div>
                     </div>
-
-                    <button className="w-full mt-8 py-4 px-6 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2">
-                        <Layers size={14} />
-                        Switch Data Layers
-                    </button>
                 </div>
             </div>
 
-            {/* Bottom Information Bar */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-                <div className="bg-black/60 backdrop-blur-2xl px-10 py-4 rounded-full border border-white/5 flex items-center gap-8 shadow-huge">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-leagle-accent shadow-glow" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Global Risk Index: <span className="text-white">Active</span></span>
+            {/* Footer Intel Bar */}
+            <div className="absolute bottom-6 left-10 z-30 flex items-center gap-8 bg-black/40 backdrop-blur-md border border-white/5 px-8 py-3 translate-y-[-2px]">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 border border-leagle-accent/20 bg-leagle-accent/5 text-leagle-accent">
+                        <ShieldCheck size={14} />
                     </div>
-                    <div className="w-px h-6 bg-white/10" />
-                    <div className="text-[9px] font-bold text-slate-500 italic max-w-[400px]">
-                        Real-time cross-referencing utilizes high-fidelity semantic parity analysis to detect legislative drift across 142 distinct regulatory categories.
-                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Compliance Integrity: <span className="text-white">Optimal</span></p>
                 </div>
+                <div className="w-px h-4 bg-white/10" />
+                <p className="text-[9px] font-bold text-slate-500 italic uppercase tracking-[0.2em]">
+                    Institutional-grade semantic synthesis active across all monitored legislative channels.
+                </p>
             </div>
         </div>
     )
@@ -84,17 +78,26 @@ export default function HeatmapPage() {
 
 function RegionStripe({ label, risk, perc, color }) {
     return (
-        <div className="space-y-2 group/stripe">
-            <div className="flex justify-between items-end">
-                <span className="text-[11px] font-bold text-white tracking-tight">{label}</span>
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-60" style={{ color }}>{risk} Risk</span>
+        <div className="space-y-3 group">
+            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className="group-hover:text-white transition-colors">{label}</span>
+                <span style={{ color }} className="text-[8px] italic">{risk}</span>
             </div>
-            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="w-full h-0.5 bg-white/5">
                 <div
-                    className="h-full transition-all duration-1000 ease-out"
+                    className="h-full transition-all duration-[2000ms] ease-in-out shadow-glow"
                     style={{ width: `${perc}%`, backgroundColor: color }}
                 />
             </div>
         </div>
+    )
+}
+
+function ShieldCheck({ size }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="m9 12 2 2 4-4" />
+        </svg>
     )
 }
