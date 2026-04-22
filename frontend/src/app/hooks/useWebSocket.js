@@ -1,12 +1,11 @@
 "use client"
 
 import { useEffect } from 'react'
-import { io } from 'socket.io-client'
 import { useAppStore } from '../store/appStore'
 import { getAlerts } from '../api/client'
 
 export function useWebSocket() {
-    const { addAlerts, setAlerts } = useAppStore()
+    const { addAlerts, setAlerts, setConnected } = useAppStore()
 
     useEffect(() => {
         // Initial Fetch
@@ -21,20 +20,33 @@ export function useWebSocket() {
         fetchInitial()
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const wsUrl = API_BASE_URL.replace('http', 'ws') + '/api/alerts/ws'
 
-        // Connect to Socket.io gateway
-        const socket = io(API_BASE_URL, {
-            path: '/ws/socket.io'
-        })
+        // Connect to Raw WebSocket gateway
+        const socket = new WebSocket(wsUrl)
 
-        socket.on('new_alert', (data) => {
-            console.log('📣 New Real-time Alert:', data)
-            addAlerts([data])
-        })
+        socket.onopen = () => {
+            console.log('✅ Connected to Real-time Feed')
+            setConnected(true)
+        }
 
-        socket.on('connect', () => console.log('✅ Connected to Real-time Feed'))
-        socket.on('disconnect', () => console.log('❌ Disconnected from Feed'))
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (data.type === 'alerts') {
+                    console.log('📣 New Real-time Alerts:', data.data)
+                    addAlerts(data.data)
+                }
+            } catch (err) {
+                console.error('WS Message Parse Error:', err)
+            }
+        }
 
-        return () => socket.disconnect()
-    }, [addAlerts, setAlerts])
+        socket.onclose = () => {
+            console.log('❌ Disconnected from Feed')
+            setConnected(false)
+        }
+
+        return () => socket.close()
+    }, [addAlerts, setAlerts, setConnected])
 }

@@ -3,6 +3,7 @@ import { create } from 'zustand'
 export const useAppStore = create((set) => ({
     alerts: [],
     unreadCount: 0,
+    connected: false,
     addAlerts: (newAlerts) =>
         set((state) => ({
             alerts: [...newAlerts, ...state.alerts].slice(0, 100),
@@ -14,4 +15,5 @@ export const useAppStore = create((set) => ({
             unreadCount: initialAlerts.filter(a => !a.is_read).length
         }),
     markRead: () => set({ unreadCount: 0 }),
+    setConnected: (connected) => set({ connected }),
 }))

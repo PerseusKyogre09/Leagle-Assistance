@@ -3,11 +3,13 @@ import { useAppStore } from '../store/appStore'
 import { Bell, AlertTriangle, Info, ChevronRight, Activity, Zap } from 'lucide-react'
 
 export default function AlertsPanel() {
-    const { alerts, unreadCount, markRead } = useAppStore()
+    const { alerts, unreadCount, markRead, connected } = useAppStore()
 
     useEffect(() => {
-        markRead()
-    }, [markRead])
+        if (unreadCount > 0) {
+            markRead()
+        }
+    }, [unreadCount, markRead])
 
     const getIcon = (severity) => {
         switch (severity) {
@@ -79,12 +81,6 @@ export default function AlertsPanel() {
                                     <p className="text-sm text-gray-300 font-medium leading-relaxed group-hover:text-white transition-colors">
                                         {alert.message}
                                     </p>
-                                    <div className="flex items-center gap-2">
-                                        <div className="px-2 py-1 rounded-lg text-[8px] font-black bg-white/5 text-gray-500 border border-white/5 flex items-center gap-1 group-hover:border-leagle-accent/30 group-hover:text-leagle-accent transition-all">
-                                            {alert.regulation_title?.slice(0, 40) || 'Regulation Update'}
-                                            <ChevronRight size={10} />
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -94,8 +90,10 @@ export default function AlertsPanel() {
 
             <div className="p-6 bg-white/5 border-t border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-leagle-accent animate-ping opacity-50"></div>
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Feed Status: Connected</span>
+                    <div className={`w-2 h-2 rounded-full ${connected ? 'bg-leagle-accent animate-ping' : 'bg-red-500'} opacity-50`}></div>
+                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">
+                        Feed Status: {connected ? 'Connected' : 'Reconnecting...'}
+                    </span>
                 </div>
                 <Activity size={14} className="text-leagle-accent/40" />
             </div>
