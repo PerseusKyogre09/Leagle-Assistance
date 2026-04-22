@@ -65,7 +65,7 @@ app.add_middleware(
 )
 
 from services.uk_legis_service import sync_uk_feed
-from services.sync_manager import sync_all_jurisdictions
+from services.sync_manager import sync_all_jurisdictions, sync_jurisdiction
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from fastapi import Depends
@@ -79,6 +79,15 @@ async def trigger_uk_sync(db: AsyncSession = Depends(get_db)):
 async def trigger_global_sync(db: AsyncSession = Depends(get_db)):
     results = await sync_all_jurisdictions(db, limit_per_source=10)
     return {"status": "success", "results": results}
+
+@app.post("/api/regulations/sync/{jurisdiction}")
+async def trigger_jurisdiction_sync(jurisdiction: str, db: AsyncSession = Depends(get_db)):
+    """Trigger a sync for a specific jurisdiction by key (e.g. 'canada', 'japan', 'germany')."""
+    count = await sync_jurisdiction(db, jurisdiction=jurisdiction.lower(), limit=10)
+    if count == -1:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Unknown jurisdiction '{jurisdiction}'")
+    return {"status": "success", "jurisdiction": jurisdiction, "count": count}
 
 app.include_router(regulations.router, prefix="/api/regulations", tags=["regulations"])
 app.include_router(policies.router, prefix="/api/policies", tags=["policies"])

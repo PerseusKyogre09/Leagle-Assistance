@@ -245,25 +245,23 @@ class AnalyticsService:
             
             heatmap = {}
             jurisdiction_map = {
-                "USA": "US",
-                "United States": "US",
-                "US": "US",
-                "United Kingdom": "GB",
-                "UK": "GB",
-                "European Union": "EU",
-                "EU": "EU",
-                "India": "IN",
-                "Australia": "AU",
-                "Canada": "CA"
+                "USA": "US", "United States": "US", "US": "US",
+                "United Kingdom": "GB", "UK": "GB",
+                "European Union": "EU", "EU": "EU",
+                "India": "IN", "Australia": "AU", "Canada": "CA",
+                "Germany": "DE", "France": "FR", "Japan": "JP",
+                "China": "CN", "Russia": "RU", "Brazil": "BR",
+                "Singapore": "SG", "South Korea": "KR", "Mexico": "MX",
+                "South Africa": "ZA", "UAE": "AE"
             }
             
             for row in rows:
                 juris = row.jurisdiction or "Global"
                 iso_code = jurisdiction_map.get(juris, juris)
                 
-                # Normalize risk score (1-10) to intensity (0-1)
+                # Normalize risk score (0-100) to intensity (0-1)
                 avg_risk = float(row.avg_risk or 0)
-                intensity = min(avg_risk / 10.0, 1.0)
+                intensity = min(avg_risk / 100.0, 1.0)
                 
                 # Map colors based on risk
                 color = "#22c55e" # Green (Low)
@@ -313,7 +311,7 @@ class AnalyticsService:
 
             return {
                 "heatmap": heatmap,
-                "connections": connections,
+                "connections": connections[:20], # Limit density
                 "summary": {
                     "total_events": sum(v["count"] for v in heatmap.values()),
                     "active_sectors": len(by_cat),
