@@ -2,7 +2,7 @@
 
 import React from 'react'
 import NeuralIntelligenceMap from '../../components/NeuralIntelligenceMap'
-import { ShieldAlert, Globe, Activity, Info, Maximize2, Layers, AlertTriangle } from 'lucide-center'
+import { ShieldAlert, Globe, Activity, Info, Maximize2, Layers, AlertTriangle } from 'lucide-react'
 
 export default function HeatmapPage() {
     return (
