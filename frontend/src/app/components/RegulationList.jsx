@@ -1,15 +1,24 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getRegulations } from '../api/client'
 import { Search, Tag, Clock, ArrowUpRight, ChevronRight } from 'lucide-react'
 import RegulationDetail from './RegulationDetail'
 
-export default function RegulationList() {
+function RegulationListContent() {
+    const searchParams = useSearchParams()
     const [regulations, setRegulations] = useState([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [selectedReg, setSelectedReg] = useState(null)
+
+    useEffect(() => {
+        const jurisdiction = searchParams.get('jurisdiction')
+        if (jurisdiction) {
+            setSearch(jurisdiction)
+        }
+    }, [searchParams])
 
     useEffect(() => {
         async function fetchRegs() {
@@ -27,7 +36,8 @@ export default function RegulationList() {
 
     const filtered = regulations.filter(r =>
     (r.title?.toLowerCase().includes(search.toLowerCase()) ||
-        r.jurisdiction?.toLowerCase().includes(search.toLowerCase()))
+        r.jurisdiction?.toLowerCase().includes(search.toLowerCase()) ||
+        (r.category?.toLowerCase() === search.toLowerCase()))
     )
 
     if (loading) return (
@@ -71,7 +81,7 @@ export default function RegulationList() {
 
                         <div className="space-y-6">
                             <div className="flex items-center gap-3">
-                                <span className={`px-2.5 py-1 rounded-sm text-[9px] font-black uppercase tracking-[0.2em] shadow-sm ${reg.jurisdiction === 'UK'
+                                <span className={`px-2.5 py-1 rounded-sm text-[9px] font-black uppercase tracking-[0.2em] shadow-sm ${reg.jurisdiction === 'UK' || reg.jurisdiction === 'GB'
                                     ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                     : 'bg-leagle-accent/10 text-leagle-accent border border-leagle-accent/20'
                                     }`}>
@@ -127,5 +137,13 @@ export default function RegulationList() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function RegulationList() {
+    return (
+        <Suspense fallback={<div>Loading Library...</div>}>
+            <RegulationListContent />
+        </Suspense>
     )
 }

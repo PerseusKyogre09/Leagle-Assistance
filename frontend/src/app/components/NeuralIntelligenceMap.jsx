@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import { scaleLinear } from 'd3-scale'
 import {
     Zap,
@@ -19,7 +20,8 @@ import {
     X,
     TrendingUp,
     FileText,
-    ExternalLink
+    ExternalLink,
+    Loader2
 } from 'lucide-react'
 import {
     ComposableMap,
@@ -41,6 +43,7 @@ const Globe = dynamic(() => import('react-globe.gl'), {
 })
 
 export default function NeuralIntelligenceMap() {
+    const router = useRouter()
     const globeRef = useRef()
     const [mode, setMode] = useState('3d')
     const [data, setData] = useState({ heatmap: {}, connections: [], summary: {} })
@@ -48,6 +51,7 @@ export default function NeuralIntelligenceMap() {
     const [zoom, setZoom] = useState(1)
     const [selectedCountry, setSelectedCountry] = useState(null)
     const [globeFeatures, setGlobeFeatures] = useState([])
+    const [isAnalyzing, setIsAnalyzing] = useState(false)
 
     const coords = {
         'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
@@ -60,7 +64,6 @@ export default function NeuralIntelligenceMap() {
     }
 
     useEffect(() => {
-        // Load country boundaries for 3D globe
         fetch(GLOBE_GEO_URL).then(res => res.json()).then(res => setGlobeFeatures(res.features))
 
         const fetchData = async () => {
@@ -127,6 +130,16 @@ export default function NeuralIntelligenceMap() {
             color: backend_stats.color || "#333"
         }
         setSelectedCountry(stats)
+    }
+
+    const handleDeepAnalysis = (e) => {
+        e.stopPropagation()
+        setIsAnalyzing(true)
+
+        // Simulate neural process before redirection
+        setTimeout(() => {
+            router.push(`/regulations?jurisdiction=${selectedCountry.id}`)
+        }, 800)
     }
 
     if (loading) return (
@@ -256,7 +269,6 @@ export default function NeuralIntelligenceMap() {
                 <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
                     <div className="bg-[#050505] border border-white/10 p-10 min-w-[380px] shadow-[0_0_150px_rgba(0,0,0,1)] relative select-none ring-1 ring-white/5">
 
-                        {/* Close Button - MEGA SIZE */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -307,19 +319,46 @@ export default function NeuralIntelligenceMap() {
                             </div>
 
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    alert(`Deep Link Analysis Initiated for ${selectedCountry.name || selectedCountry.id}`);
-                                }}
-                                className="group w-full py-5 bg-leagle-accent text-black text-[11px] font-black uppercase tracking-[0.5em] hover:bg-white transition-all shadow-glow flex items-center justify-center gap-3 active:scale-[0.98]"
+                                onClick={handleDeepAnalysis}
+                                disabled={isAnalyzing}
+                                className="group w-full py-5 bg-leagle-accent text-black text-[11px] font-black uppercase tracking-[0.5em] hover:bg-white disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed transition-all shadow-glow flex items-center justify-center gap-3 active:scale-[0.98]"
                             >
-                                <ExternalLink size={14} />
-                                Execute Deep Analysis
+                                {isAnalyzing ? (
+                                    <>
+                                        <Loader2 size={14} className="animate-spin" />
+                                        Analyzing Regional Parallels...
+                                    </>
+                                ) : (
+                                    <>
+                                        <ExternalLink size={14} />
+                                        Execute Deep Analysis
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* COMPACT HUD */}
+            <div className="absolute top-6 left-6 z-50 select-none">
+                <div className="bg-black/80 backdrop-blur-2xl px-5 py-4 border border-white/10 space-y-3 min-w-[200px]">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-1 h-5 bg-leagle-accent shadow-glow" />
+                        <h2 className="text-[13px] font-black text-white tracking-[0.2em] uppercase italic leading-none">Neural Core</h2>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] font-bold text-slate-600 uppercase">Mass</span>
+                            <span className="text-[14px] font-black text-white">{data.summary?.cross_border_parallels || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] font-bold text-slate-600 uppercase">Sync</span>
+                            <span className="text-[14px] font-black text-emerald-500 uppercase tracking-tighter">Live</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     )
