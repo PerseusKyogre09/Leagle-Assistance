@@ -13,7 +13,7 @@ class Regulation(Base):
     
     # Columns
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    title: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     source: Mapped[str] = mapped_column(String(255), nullable=True)  # e.g., "eu.gdpr", "india.sebi"
     category: Mapped[str] = mapped_column(String(100), nullable=True, index=True)  # "data_privacy", "finance", "labor"
     jurisdiction: Mapped[str] = mapped_column(String(100), nullable=True)  # e.g., "EU", "US", "India"
