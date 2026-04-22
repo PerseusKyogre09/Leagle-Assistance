@@ -2,7 +2,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from services.sync_manager import sync_all_jurisdictions
-from core.database import SessionLocal
+from core.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ scheduler = AsyncIOScheduler()
 async def scheduled_sync():
     """Wrapper for the daily sync task."""
     logger.info("⏰ [Scheduler] Starting automated 24h jurisdictional sync...")
-    async with SessionLocal() as db:
+    async with AsyncSessionLocal() as db:
         try:
             results = await sync_all_jurisdictions(db, limit_per_source=20)
             logger.info(f"✅ [Scheduler] Automated sync completed. Total added: {results.get('total', 0)}")
