@@ -18,7 +18,8 @@ import {
     ZoomOut,
     X,
     TrendingUp,
-    FileText
+    FileText,
+    ExternalLink
 } from 'lucide-react'
 import {
     ComposableMap,
@@ -48,8 +49,18 @@ export default function NeuralIntelligenceMap() {
     const [selectedCountry, setSelectedCountry] = useState(null)
     const [globeFeatures, setGlobeFeatures] = useState([])
 
+    const coords = {
+        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
+        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
+        'UK': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
+        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
+        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
+        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
+        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
+    }
+
     useEffect(() => {
-        // Load country boundaries for 3D globe only
+        // Load country boundaries for 3D globe
         fetch(GLOBE_GEO_URL).then(res => res.json()).then(res => setGlobeFeatures(res.features))
 
         const fetchData = async () => {
@@ -69,47 +80,41 @@ export default function NeuralIntelligenceMap() {
         return () => clearInterval(interval)
     }, [])
 
-    const coords = {
-        'US': { lat: 37.0902, lng: -95.7129, iso2: 'US' },
-        'GB': { lat: 55.3781, lng: -3.4360, iso2: 'GB' },
-        'EU': { lat: 50.8503, lng: 4.3517, iso2: 'EU' },
-        'IN': { lat: 20.5937, lng: 78.9629, iso2: 'IN' },
-        'AU': { lat: -25.2744, lng: 133.7751, iso2: 'AU' },
-        'CA': { lat: 56.1304, lng: -106.3468, iso2: 'CA' }
-    }
-
+    // Filter out any jurisdictions that don't have coordinates to avoid (0,0) placement in ocean
     const globeData = useMemo(() => {
         if (!data.heatmap) return []
-        return Object.values(data.heatmap).map(d => ({
-            ...d,
-            lat: coords[d.id]?.lat || 0,
-            lng: coords[d.id]?.lng || 0,
-            color: d.color
-        }))
+        return Object.values(data.heatmap)
+            .filter(d => coords[d.id]) // CRITICAL: Only show if we have valid coords
+            .map(d => ({
+                ...d,
+                lat: coords[d.id].lat,
+                lng: coords[d.id].lng,
+                color: d.color
+            }))
     }, [data.heatmap])
 
     const arcsData = useMemo(() => {
         if (!data.connections) return []
-        return data.connections.map(conn => ({
-            startLat: coords[conn.startId]?.lat || 0,
-            startLng: coords[conn.startId]?.lng || 0,
-            endLat: coords[conn.endId]?.lat || 0,
-            endLng: coords[conn.endId]?.lng || 0,
-            color: ['#0ea5e9', '#6366f1', '#22c55e'][Math.floor(Math.random() * 3)],
-            name: conn.label
-        }))
+        return data.connections
+            .filter(conn => coords[conn.startId] && coords[conn.endId]) // CRITICAL: Only show if starts/ends exist
+            .map(conn => ({
+                startLat: coords[conn.startId].lat,
+                startLng: coords[conn.startId].lng,
+                endLat: coords[conn.endId].lat,
+                endLng: coords[conn.endId].lng,
+                color: ['#0ea5e9', '#6366f1', '#22c55e'][Math.floor(Math.random() * 3)],
+                name: conn.label
+            }))
     }, [data.connections])
 
-    // Mapping Numerical/Name IDs from topojson to ISO_A2
     const map2DToISO = (geo) => {
         const name = geo.properties.name
-        if (name === "United States of America" || name === "USA") return "US"
+        if (name === "United States of America" || name === "USA" || name === "United States") return "US"
         if (name === "United Kingdom") return "GB"
         if (name === "India") return "IN"
         if (name === "Australia") return "AU"
         if (name === "Canada") return "CA"
-        // European Union check is trickier as it's multiple countries, using Belgium/Brussels as hub proxy if needed
-        if (name === "Belgium" || name === "France" || name === "Germany") return "EU"
+        if (name === "Belgium" || name === "France" || name === "Germany" || name === "European Union") return "EU"
         return null
     }
 
@@ -161,7 +166,7 @@ export default function NeuralIntelligenceMap() {
                         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
 
                         polygonsData={globeFeatures}
-                        polygonCapColor={() => 'rgba(255, 255, 255, 0.05)'}
+                        polygonCapColor={() => 'rgba(255, 255, 255, 0.04)'}
                         polygonSideColor={() => 'rgba(255, 255, 255, 0.02)'}
                         polygonStrokeColor={() => '#333'}
                         polygonLabel={({ properties: d }) => `<b>${d.NAME}</b>`}
@@ -175,7 +180,7 @@ export default function NeuralIntelligenceMap() {
                         pointLng="lng"
                         pointColor="color"
                         pointAltitude={0.01}
-                        pointRadius={0.8}
+                        pointRadius={1.0}
 
                         arcsData={arcsData}
                         arcStartLat="startLat"
@@ -186,7 +191,7 @@ export default function NeuralIntelligenceMap() {
                         arcDashLength={0.6}
                         arcDashGap={1.5}
                         arcDashAnimateTime={4000}
-                        arcStroke={0.5}
+                        arcStroke={0.6}
 
                         width={1600}
                         height={1000}
@@ -223,75 +228,87 @@ export default function NeuralIntelligenceMap() {
                                         from={[arc.startLng, arc.startLat]}
                                         to={[arc.endLng, arc.endLat]}
                                         stroke={arc.color}
-                                        strokeWidth={0.8}
-                                        strokeOpacity={0.3}
+                                        strokeWidth={1}
+                                        strokeOpacity={0.4}
                                         strokeLinecap="round"
                                         className="neural-arc-2d"
                                     />
                                 ))}
                                 {globeData.map((d, i) => (
                                     <Marker key={i} coordinates={[d.lng, d.lat]}>
-                                        <circle r={2.5} fill={d.color} stroke="#000" strokeWidth={0.5} />
-                                        <circle r={6} fill={d.color} opacity={0.1} className="animate-pulse" />
+                                        <circle r={3} fill={d.color} stroke="#000" strokeWidth={0.5} />
+                                        <circle r={7} fill={d.color} opacity={0.15} className="animate-pulse" />
                                     </Marker>
                                 ))}
                             </ZoomableGroup>
                         </ComposableMap>
                         <style jsx global>{`
-              .neural-arc-2d { stroke-dasharray: 5, 5; animation: arcFlow 30s linear infinite; }
-              @keyframes arcFlow { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
+              .neural-arc-2d { stroke-dasharray: 6, 10; animation: arcFlow 25s linear infinite; }
+              @keyframes arcFlow { from { stroke-dashoffset: 300; } to { stroke-dashoffset: 0; } }
             `}</style>
                     </div>
                 )}
             </div>
 
-            {/* MODAL SYSTEM */}
+            {/* MODAL SYSTEM - HARDENED INTERACTIVITY */}
             {selectedCountry && (
-                <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-black/90 backdrop-blur-3xl border border-white/10 p-8 min-w-[320px] shadow-[0_0_100px_rgba(0,0,0,1)] relative select-none">
+                <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-[#050505] border border-white/10 p-10 min-w-[380px] shadow-[0_0_150px_rgba(0,0,0,1)] relative select-none ring-1 ring-white/5">
+
+                        {/* Close Button - More Persistent */}
                         <button
-                            onClick={() => setSelectedCountry(null)}
-                            className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCountry(null);
+                            }}
+                            className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white hover:bg-white/5 transition-all rounded-sm z-[110]"
                         >
-                            <X size={16} />
+                            <X size={20} strokeWidth={3} />
                         </button>
 
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="w-1.5 h-12" style={{ backgroundColor: selectedCountry.color }} />
-                            <div>
-                                <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">{selectedCountry.name}</h2>
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">Node Reference: {selectedCountry.id}</p>
+                        <div className="flex items-center gap-6 mb-10">
+                            <div className="w-2 h-16 shadow-glow" style={{ backgroundColor: selectedCountry.color }} />
+                            <div className="space-y-1">
+                                <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">{selectedCountry.name}</h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Node Hash: {selectedCountry.id}</span>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-8">
-                            <div className="grid grid-cols-2 gap-8">
-                                <div className="space-y-2">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Intelligence Mass</p>
-                                    <div className="flex items-center gap-3">
-                                        <FileText size={14} className="text-leagle-accent" />
-                                        <span className="text-2xl font-black text-white">{selectedCountry.count || 0}</span>
+                        <div className="space-y-10">
+                            <div className="grid grid-cols-2 gap-10">
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Intelligence Mass</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-black text-white leading-none">{selectedCountry.count || 0}</span>
+                                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Units</span>
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Regional Divergence</p>
-                                    <div className="flex items-center gap-3">
-                                        <TrendingUp size={14} style={{ color: selectedCountry.color }} />
-                                        <span className="text-2xl font-black text-white" style={{ color: selectedCountry.color }}>
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Neural Divergence</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-black leading-none" style={{ color: selectedCountry.color }}>
                                             {Math.round(selectedCountry.avg_risk || 0)}%
                                         </span>
+                                        <TrendingUp size={14} style={{ color: selectedCountry.color }} />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-white/5">
-                                <p className="text-[11px] text-slate-500 font-medium italic leading-relaxed">
-                                    Cross-referencing {selectedCountry.name} yields high semantic correlation with global transparency initiatives. System suggests deep-layer validation for upcoming sustainability reporting drafts.
+                            <div className="bg-white/5 p-4 border-l-2 border-slate-700">
+                                <p className="text-[11px] text-slate-400 font-medium italic leading-relaxed">
+                                    Autonomous tracking for {selectedCountry.name} active. Semantic synthesis detects high divergence in localized labor frameworks compared to G7 baselines.
                                 </p>
                             </div>
 
-                            <button className="w-full py-4 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.4em] hover:bg-leagle-accent hover:text-black hover:border-transparent transition-all active:scale-95">
-                                Execute Deep Link Analysis
+                            <button
+                                onClick={() => alert(`Deep Link Analysis Initiated for ${selectedCountry.name}`)}
+                                className="group w-full py-5 bg-leagle-accent text-black text-[11px] font-black uppercase tracking-[0.5em] hover:bg-white transition-all shadow-glow flex items-center justify-center gap-3 active:scale-[0.98]"
+                            >
+                                <ExternalLink size={14} />
+                                Execute Deep Analysis
                             </button>
                         </div>
                     </div>
@@ -300,23 +317,29 @@ export default function NeuralIntelligenceMap() {
 
             {/* COMPACT HUD */}
             <div className="absolute top-6 left-6 z-50 select-none">
-                <div className="bg-black/80 backdrop-blur-2xl px-5 py-4 border border-white/10 space-y-3 min-w-[180px]">
+                <div className="bg-black/80 backdrop-blur-2xl px-5 py-4 border border-white/10 space-y-3 min-w-[200px]">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-0.5 h-4 bg-leagle-accent" />
-                        <h2 className="text-[11px] font-black text-white tracking-[0.2em] uppercase italic leading-none">Neural Core</h2>
+                        <div className="w-1 h-5 bg-leagle-accent shadow-glow" />
+                        <h2 className="text-[13px] font-black text-white tracking-[0.2em] uppercase italic leading-none">Neural Core</h2>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/5 font-mono">
-                        <div><p className="text-[11px] font-black text-white">{data.summary?.cross_border_parallels || 0}</p></div>
-                        <div><p className="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Active</p></div>
+                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] font-bold text-slate-600 uppercase">Mass</span>
+                            <span className="text-[14px] font-black text-white">{data.summary?.cross_border_parallels || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[7px] font-bold text-slate-600 uppercase">Sync</span>
+                            <span className="text-[14px] font-black text-emerald-500 uppercase tracking-tighter">Live</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* ZOOM & FOCUS */}
+            {/* ZOOM & CONTROL STRIP */}
             <div className="absolute bottom-6 right-6 z-40 flex items-center gap-2">
                 <div className="flex bg-black/60 backdrop-blur-md border border-white/10 p-1 mr-2 gap-1 rounded-sm">
                     <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} className="p-2 text-slate-500 hover:text-white"><ZoomOut size={14} /></button>
-                    <button onClick={() => setZoom(z => Math.min(z + 0.5, 8))} className="p-2 text-slate-500 hover:text-white border-l border-white/10"><ZoomIn size={14} /></button>
+                    <button onClick={() => setZoom(z => Math.min(z + 0.5, 12))} className="p-2 text-slate-500 hover:text-white border-l border-white/10"><ZoomIn size={14} /></button>
                 </div>
                 <div className="bg-black/60 backdrop-blur-md border border-white/10 p-1 flex gap-1 rounded-sm">
                     {['US', 'UK', 'EU', 'IN', 'AU'].map(iso => (
@@ -328,7 +351,7 @@ export default function NeuralIntelligenceMap() {
                                     globeRef.current.pointOfView({ lat: target.lat, lng: target.lng, altitude: 1.8 }, 1500)
                                 }
                             }}
-                            className="px-4 py-2 text-[9px] font-black text-slate-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest"
+                            className="px-5 py-2.5 text-[10px] font-black text-slate-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest"
                         >
                             {iso}
                         </button>
