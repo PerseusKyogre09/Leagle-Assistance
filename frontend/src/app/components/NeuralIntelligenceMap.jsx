@@ -12,7 +12,8 @@ import {
     AlertCircle,
     Maximize2,
     ChevronRight,
-    Crosshair
+    Crosshair,
+    Wifi
 } from 'lucide-react'
 import {
     ComposableMap,
@@ -27,7 +28,7 @@ const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 // Dynamic import for Globe.gl
 const Globe = dynamic(() => import('react-globe.gl'), {
     ssr: false,
-    loading: () => <div className="w-full h-full flex items-center justify-center text-slate-500 font-mono text-[10px] tracking-[0.5em] uppercase">Booting Neural Core...</div>
+    loading: () => <div className="w-full h-full flex items-center justify-center text-slate-500 font-mono text-[8px] tracking-[0.5em] uppercase">Booting Neural Core...</div>
 })
 
 export default function NeuralIntelligenceMap() {
@@ -59,6 +60,8 @@ export default function NeuralIntelligenceMap() {
             }
         }
         fetchData()
+        const interval = setInterval(fetchData, 30000) // Refresh every 30s
+        return () => clearInterval(interval)
     }, [])
 
     const globeData = useMemo(() => {
@@ -67,7 +70,7 @@ export default function NeuralIntelligenceMap() {
             ...d,
             lat: coords[d.id]?.lat || 0,
             lng: coords[d.id]?.lng || 0,
-            size: 0.8, // Fixed subtle size
+            size: 0.8,
             radius: 0.5,
             color: d.color
         }))
@@ -88,33 +91,33 @@ export default function NeuralIntelligenceMap() {
     if (loading) return (
         <div className="w-full h-full min-h-[700px] flex items-center justify-center bg-black/40 border border-white/5">
             <div className="flex flex-col items-center gap-4">
-                <Activity className="animate-pulse text-leagle-accent" size={32} />
-                <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-500">Synchronizing Global Parallels</p>
+                <Activity className="animate-pulse text-leagle-accent" size={24} />
+                <p className="text-[8px] font-black uppercase tracking-[0.5em] text-slate-500">Synchronizing Global Parallels</p>
             </div>
         </div>
     )
 
     return (
-        <div className="relative w-full h-[800px] bg-leagle-bg border border-white/5 overflow-hidden transition-all duration-700">
+        <div className="relative w-full h-full min-h-[800px] bg-leagle-bg overflow-hidden transition-all duration-700">
 
-            {/* 2D/3D Mode Toggle */}
-            <div className="absolute top-8 right-10 z-40 flex bg-black/40 backdrop-blur-md border border-white/10 p-1">
+            {/* 2D/3D Mode Toggle - Repositioned for less obstruction */}
+            <div className="absolute top-6 right-6 z-40 flex bg-black/60 backdrop-blur-md border border-white/10 p-0.5">
                 <button
                     onClick={() => setMode('2d')}
-                    className={`flex items-center gap-2 px-6 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${mode === '2d' ? 'bg-leagle-accent text-black' : 'text-slate-500 hover:text-white'}`}
+                    className={`flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black uppercase tracking-[0.2em] transition-all ${mode === '2d' ? 'bg-leagle-accent text-black' : 'text-slate-500 hover:text-white'}`}
                 >
-                    <MapIcon size={12} /> 2D Flat
+                    <MapIcon size={10} /> 2D
                 </button>
                 <button
                     onClick={() => setMode('3d')}
-                    className={`flex items-center gap-2 px-6 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${mode === '3d' ? 'bg-leagle-accent text-black' : 'text-slate-500 hover:text-white'}`}
+                    className={`flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black uppercase tracking-[0.2em] transition-all ${mode === '3d' ? 'bg-leagle-accent text-black' : 'text-slate-500 hover:text-white'}`}
                 >
-                    <GlobeIcon size={12} /> 3D Globe
+                    <GlobeIcon size={10} /> 3D
                 </button>
             </div>
 
             {/* Primary Visualizer Container */}
-            <div className="w-full h-full">
+            <div className="w-full h-full flex items-center justify-center">
                 {mode === '3d' ? (
                     <Globe
                         ref={globeRef}
@@ -127,7 +130,7 @@ export default function NeuralIntelligenceMap() {
                         pointLng="lng"
                         pointColor="color"
                         pointAltitude={0.01}
-                        pointRadius={0.6}
+                        pointRadius={0.7}
 
                         arcsData={arcsData}
                         arcStartLat="startLat"
@@ -135,25 +138,26 @@ export default function NeuralIntelligenceMap() {
                         arcEndLat="endLat"
                         arcEndLng="endLng"
                         arcColor="color"
-                        arcDashLength={0.5}
-                        arcDashGap={2}
-                        arcDashAnimateTime={3000}
-                        arcStroke={0.4}
+                        arcDashLength={0.6}
+                        arcDashGap={1.5}
+                        arcDashAnimateTime={4000}
+                        arcStroke={0.5}
 
-                        width={1200}
-                        height={850}
+                        animateIn={true}
+                        width={1600}
+                        height={1000}
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center p-20 animate-in fade-in duration-500 bg-black/10">
-                        <ComposableMap projectionConfig={{ scale: 200 }}>
+                    <div className="w-full h-full flex items-center justify-center p-20 animate-in zoom-in duration-500 bg-black/10">
+                        <ComposableMap projectionConfig={{ scale: 220 }}>
                             <Geographies geography={geoUrl}>
                                 {({ geographies }) =>
                                     geographies.map((geo) => (
                                         <Geography
                                             key={geo.rsmKey}
                                             geography={geo}
-                                            fill="#111"
-                                            stroke="#333"
+                                            fill="#0a0a0a"
+                                            stroke="#1a1a1a"
                                             strokeWidth={0.5}
                                         />
                                     ))
@@ -165,14 +169,15 @@ export default function NeuralIntelligenceMap() {
                                     from={[arc.startLng, arc.startLat]}
                                     to={[arc.endLng, arc.endLat]}
                                     stroke={arc.color}
-                                    strokeWidth={1}
-                                    strokeLinecap="round"
+                                    strokeWidth={1.5}
+                                    strokeOpacity={0.6}
+                                    strokeLinecap="butt"
                                 />
                             ))}
                             {globeData.map((d, i) => (
                                 <Marker key={i} coordinates={[d.lng, d.lat]}>
-                                    <circle r={4} fill={d.color} stroke="#000" strokeWidth={1} />
-                                    <circle r={8} fill={d.color} opacity={0.2} className="animate-ping" />
+                                    <circle r={3} fill={d.color} stroke="#000" strokeWidth={0.5} />
+                                    <circle r={6} fill={d.color} opacity={0.15} className="animate-pulse" />
                                 </Marker>
                             ))}
                         </ComposableMap>
@@ -180,42 +185,45 @@ export default function NeuralIntelligenceMap() {
                 )}
             </div>
 
-            {/* Minimalism HUD: Top Left */}
-            <div className="absolute top-10 left-10 z-30 select-none pointer-events-none">
-                <div className="bg-black/40 backdrop-blur-xl p-8 border border-white/5 space-y-6 min-w-[280px]">
-                    <div className="flex items-center gap-4">
-                        <div className="w-1.5 h-10 bg-leagle-accent shadow-glow" />
-                        <div>
-                            <h2 className="text-xl font-bold text-white tracking-tighter uppercase italic leading-none">Neural Core</h2>
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Status: Operational</p>
+            {/* COMPACT HUD: Top Left - Fixed Overlap */}
+            <div className="absolute top-6 left-6 z-50 select-none">
+                <div className="bg-black/80 backdrop-blur-2xl px-6 py-5 border border-white/10 space-y-4 min-w-[220px]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-1 h-6 bg-leagle-accent shadow-glow" />
+                        <div className="flex flex-col">
+                            <h2 className="text-[14px] font-black text-white tracking-widest uppercase italic leading-none">Neural Core</h2>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <Wifi size={8} className="text-emerald-500" />
+                                <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Active Synthesis</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-4 pt-4 border-t border-white/5 pointer-events-auto">
-                        <div className="flex justify-between items-end">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Active Parallels</span>
-                            <span className="text-lg font-bold text-white">{data.summary?.cross_border_parallels || 0}</span>
+                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                        <div>
+                            <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Parallels</p>
+                            <p className="text-[14px] font-black text-white">{data.summary?.cross_border_parallels || 0}</p>
                         </div>
-                        <div className="flex justify-between items-end">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Sync Integrity</span>
-                            <span className="text-lg font-bold text-leagle-accent">99%</span>
+                        <div>
+                            <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Fidelity</p>
+                            <p className="text-[14px] font-black text-leagle-accent">99.4%</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Stream Overlay: Bottom Left */}
-            <div className="absolute bottom-10 left-10 z-30 max-w-[300px] pointer-events-auto">
-                <div className="bg-black/60 backdrop-blur-md p-6 border border-white/5 space-y-4">
-                    <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 flex items-center gap-2">
-                        <Activity size={10} className="text-emerald-500" />
+            {/* STREAM OVERLAY: Bottom Left - More Compact */}
+            <div className="absolute bottom-6 left-6 z-30 max-w-[260px] pointer-events-auto">
+                <div className="bg-black/60 backdrop-blur-xl p-4 border border-white/5 space-y-3">
+                    <h3 className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                        <Activity size={10} className="text-leagle-accent" />
                         Intelligence Stream
                     </h3>
-                    <div className="space-y-3">
-                        {arcsData.slice(0, 3).map((arc, i) => (
-                            <div key={i} className="group cursor-help border-l border-white/5 pl-4 py-1 hover:border-leagle-accent transition-all">
-                                <p className="text-[10px] text-slate-400 font-medium leading-tight group-hover:text-white transition-colors uppercase tracking-tight">
-                                    Parallel Detected: <span className="text-leagle-accent italic">{arc.name}</span>
+                    <div className="space-y-2 max-h-[120px] overflow-hidden">
+                        {arcsData.slice(0, 4).map((arc, i) => (
+                            <div key={i} className="group border-l border-white/10 pl-3 py-0.5 hover:border-leagle-accent transition-all">
+                                <p className="text-[9px] text-slate-400 font-medium leading-tight group-hover:text-white transition-colors uppercase tracking-tight">
+                                    <span className="text-leagle-accent opacity-50 mr-1">»</span> {arc.name}
                                 </p>
                             </div>
                         ))}
@@ -223,17 +231,18 @@ export default function NeuralIntelligenceMap() {
                 </div>
             </div>
 
-            {/* Control Strip: Bottom Center */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 bg-black/40 backdrop-blur-xl border border-white/10 p-2 flex gap-2 overflow-hideen">
+            {/* CONTROL STRIP: Bottom Right - Moved to avoid Bottom Center clutter */}
+            <div className="absolute bottom-6 right-6 z-40 bg-black/60 backdrop-blur-md border border-white/10 p-1 flex gap-1">
                 {['US', 'UK', 'EU', 'IN', 'AU'].map(iso => (
                     <button
                         key={iso}
                         onClick={() => {
                             if (mode === '3d' && globeRef.current) {
-                                globeRef.current.pointOfView({ lat: coords[iso].lat, lng: coords[iso].lng, altitude: 2 }, 1000)
+                                const target = coords[iso]
+                                globeRef.current.pointOfView({ lat: target.lat, lng: target.lng, altitude: 1.8 }, 1500)
                             }
                         }}
-                        className="px-6 py-2 text-[10px] font-black text-slate-500 hover:text-white border border-white/5 hover:border-leagle-accent hover:bg-leagle-accent hover:text-black transition-all uppercase tracking-widest"
+                        className="px-4 py-1.5 text-[9px] font-black text-slate-400 hover:text-white border border-transparent hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-widest"
                     >
                         {iso}
                     </button>
