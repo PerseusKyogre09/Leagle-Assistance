@@ -62,7 +62,7 @@ async def _sync_france_laws(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description}\n\nSource: {link}",
                     source="Légifrance (France)",
                     category=category,
-                    jurisdiction="FR",
+                    jurisdiction="France",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -95,7 +95,7 @@ async def _sync_france_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (France).\nFull coverage: {link}",
                     source="France Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="FR",
+                    jurisdiction="France",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

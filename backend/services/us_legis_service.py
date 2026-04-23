@@ -74,7 +74,7 @@ async def sync_us_regulations(db: AsyncSession, limit: int = 10):
                     text=f"{title}\n\n{text}",
                     source=f"Federal Register ({', '.join(agency_names)})",
                     category=category,
-                    jurisdiction="US",
+                    jurisdiction="United States (Federal)",
                     effective_date=publication_date
                 )
                 

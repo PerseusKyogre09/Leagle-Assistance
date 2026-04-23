@@ -62,7 +62,7 @@ async def _sync_germany_laws(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description}\n\nSource: {link}",
                     source="Gesetze-im-Internet (Germany)",
                     category=category,
-                    jurisdiction="DE",
+                    jurisdiction="Germany",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -95,7 +95,7 @@ async def _sync_germany_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (Germany).\nFull coverage: {link}",
                     source="Germany Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="DE",
+                    jurisdiction="Germany",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

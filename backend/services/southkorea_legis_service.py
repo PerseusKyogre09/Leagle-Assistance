@@ -61,7 +61,7 @@ async def _sync_korea_klri(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="Korea Legislation Research Institute (KLRI)",
                     category=category,
-                    jurisdiction="KR",
+                    jurisdiction="South Korea",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -94,7 +94,7 @@ async def _sync_korea_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (South Korea).\nFull coverage: {link}",
                     source="South Korea Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="KR",
+                    jurisdiction="South Korea",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

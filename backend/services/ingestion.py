@@ -1,6 +1,7 @@
 import io
 import logging
 from pypdf import PdfReader
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.regulation import Regulation
 from models.policy import Policy
@@ -29,12 +30,22 @@ async def ingest_regulation(
 ) -> Regulation:
     """
     Full ingestion pipeline for a regulation:
-    1. Save raw text to PostgreSQL
-    2. Chunk + embed + upsert to Qdrant
-    3. Update PostgreSQL record with Qdrant chunk IDs
-    4. Run risk scorer
+    1. Check if regulation already exists (idempotency)
+    2. Save raw text to PostgreSQL
+    3. Chunk + embed + upsert to Qdrant
+    4. Update PostgreSQL record with Qdrant chunk IDs
+    5. Run risk scorer
     """
     ensure_collection_exists()
+
+    # Step 0: Idempotency Check
+    existing = await db.execute(
+        select(Regulation).where(Regulation.title == title, Regulation.jurisdiction == jurisdiction)
+    )
+    reg_existing = existing.scalar_one_or_none()
+    if reg_existing:
+        logger.info(f"⏭️ Skipping existing regulation: {title} ({jurisdiction})")
+        return reg_existing
 
     # Step 1: Create PostgreSQL record (without Qdrant IDs yet)
     try:

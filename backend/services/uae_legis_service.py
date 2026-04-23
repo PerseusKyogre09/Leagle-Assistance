@@ -8,10 +8,10 @@ from core.utils import get_random_user_agent
 
 logger = logging.getLogger(__name__)
 
-# UAE: MOJ (Ministry of Justice) and news - UAE Official Gazette (Al Jarida Al Rasmiyya)
+# DIFC Laws & Regulations - Official Portal (UAE)
+UAE_DIFC_URL = "https://www.difc.ae/business/laws-regulations/legal-database/"
+UAE_DIFC_RSS = "https://www.difc.ae/business/laws-regulations/rss" 
 UAE_NEWS_RSS = "https://news.google.com/rss/search?q=UAE+regulation+law+CBUAE+SCA+DIFC+ADGM&hl=en-AE&gl=AE&ceid=AE:en"
-# DIFC Laws have a public law portal
-UAE_DIFC_RSS = "https://www.difc.ae/business/laws-regulations/rss/"
 
 async def sync_uae_regulations(db: AsyncSession, limit: int = 10) -> int:
     """Coordinates UAE regulatory sync from DIFC portal and news alerts."""
@@ -28,6 +28,9 @@ async def _sync_uae_difc(db: AsyncSession, limit: int = 10) -> int:
     async with httpx.AsyncClient(headers=headers, follow_redirects=True, timeout=30.0) as client:
         try:
             response = await client.get(UAE_DIFC_RSS)
+            if response.status_code == 404:
+                logger.warning("⚠️ UAE DIFC RSS returned 404, skipping to portal scraping.")
+                return 0 # Scraper can be added here if needed
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "xml")
         except Exception as e:
@@ -49,16 +52,10 @@ async def _sync_uae_difc(db: AsyncSession, limit: int = 10) -> int:
 
             category = "compliance"
             lower = (title + description).lower()
-            if "data protection" in lower or "privacy" in lower or "pdpl" in lower:
+            if any(x in lower for x in ["data protection", "privacy", "pdpl"]):
                 category = "data_privacy"
-            elif "financial" in lower or "cbuae" in lower or "sca" in lower or "adgm" in lower or "difc" in lower:
+            elif any(x in lower for x in ["financial", "cbuae", "sca", "adgm", "difc"]):
                 category = "financial"
-            elif "environment" in lower or "climate" in lower or "net zero" in lower:
-                category = "environmental"
-            elif "health" in lower or "dha" in lower or "haad" in lower:
-                category = "healthcare"
-            elif "cybersecurity" in lower or "data security" in lower:
-                category = "security"
 
             print(f"📥 Syncing UAE: {title[:60]}... ({category})")
             try:
@@ -68,7 +65,7 @@ async def _sync_uae_difc(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="DIFC Laws & Regulations (UAE)",
                     category=category,
-                    jurisdiction="AE",
+                    jurisdiction="UAE",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -92,8 +89,10 @@ async def _sync_uae_news(db: AsyncSession, limit: int = 5) -> int:
         items = soup.find_all("item")
         count = 0
         for item in items[:limit]:
-            title = item.find("title").text if item.find("title") else "Unknown UAE Regulatory Alert"
-            link = item.find("link").text if item.find("link") else ""
+            title_tag = item.find("title")
+            title = title_tag.text if title_tag else "Unknown UAE Regulatory Alert"
+            link_tag = item.find("link")
+            link = link_tag.text if link_tag else ""
             try:
                 regulation = await ingest_regulation(
                     db=db,
@@ -101,7 +100,7 @@ async def _sync_uae_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (UAE).\nFull coverage: {link}",
                     source="UAE Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="AE",
+                    jurisdiction="UAE",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

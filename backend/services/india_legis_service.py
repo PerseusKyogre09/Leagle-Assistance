@@ -87,7 +87,7 @@ async def sync_indiacode(db: AsyncSession, limit: int = 10):
                         text=f"Statutory Record from IndiaCode.\nMinistry: {ministry}\nEnactment Date: {date_issued}\nSource URL: {handle_url}",
                         source="IndiaCode Statutory Repository",
                         category="compliance",
-                        jurisdiction="IN"
+                        jurisdiction="India (Bharat)"
                     )
                     await run_impact_analysis(db, regulation)
                     count += 1
@@ -124,7 +124,7 @@ async def sync_india_news(db: AsyncSession, limit: int = 10):
                         text=f"Regulatory Intelligence Alert.\nFull coverage: {link}",
                         source="India Regulatory Alerts",
                         category="compliance",
-                        jurisdiction="IN"
+                        jurisdiction="India (Bharat)"
                     )
                     await run_impact_analysis(db, regulation)
                     count += 1
@@ -172,7 +172,7 @@ async def sync_datagov_india(db: AsyncSession, limit: int = 10):
                     text=f"Dataset Catalog Entry: {link}\n\n{title}",
                     source="Data.gov.in OGD",
                     category="compliance",
-                    jurisdiction="IN"
+                    jurisdiction="India (Bharat)"
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

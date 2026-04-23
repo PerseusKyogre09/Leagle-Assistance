@@ -12,7 +12,19 @@ const JURISDICTION_LABELS = {
     'UK': 'United Kingdom',
     'GB': 'United Kingdom',
     'AU': 'Australia',
-    'EU': 'European Union'
+    'EU': 'European Union',
+    'CA': 'Canada',
+    'DE': 'Germany',
+    'FR': 'France',
+    'JP': 'Japan',
+    'CN': 'China',
+    'RU': 'Russia',
+    'BR': 'Brazil',
+    'SG': 'Singapore',
+    'KR': 'South Korea',
+    'MX': 'Mexico',
+    'ZA': 'South Africa',
+    'AE': 'UAE'
 }
 
 function RegulationListContent() {
@@ -137,11 +149,13 @@ function RegulationListContent() {
                                 onChange={(e) => handleJurisdictionChange(e.target.value)}
                             >
                                 <option value="all">Global Oversight (All Regions)</option>
-                                {jurisdictions.map(j => (
-                                    <option key={j.id} value={j.id}>
-                                        {(JURISDICTION_LABELS[j.id] || j.id).toUpperCase()} ({j.count})
-                                    </option>
-                                ))}
+                                {jurisdictions
+                                    .filter(j => j.id !== 'all' && j.id !== 'Global Oversight') // Prevent redundancy
+                                    .map(j => (
+                                        <option key={j.id} value={j.id}>
+                                            {JURISDICTION_LABELS[j.id] || j.id} ({j.count})
+                                        </option>
+                                    ))}
                             </select>
                             <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 group-hover/select:text-leagle-accent pointer-events-none transition-colors" />
                         </div>
@@ -183,11 +197,8 @@ function RegulationListContent() {
 
                         <div className="space-y-8">
                             <div className="flex items-center gap-4">
-                                <span className={`px-3 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-[0.4em] shadow-lg ${reg.jurisdiction === 'UK' || reg.jurisdiction === 'GB'
-                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                                    : 'bg-leagle-accent/20 text-leagle-accent border border-leagle-accent/30'
-                                    }`}>
-                                    {reg.jurisdiction || 'Global'}
+                                <span className="px-3 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-[0.4em] shadow-lg bg-leagle-accent/20 text-leagle-accent border border-leagle-accent/30">
+                                    {JURISDICTION_LABELS[reg.jurisdiction] || reg.jurisdiction || 'Global Oversight'}
                                 </span>
                                 <span className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 rounded-sm text-[10px] font-black uppercase tracking-[0.4em]">
                                     {reg.category || 'General'}

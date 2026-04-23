@@ -27,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 # Registry of all supported jurisdictions: (key, sync_fn, display_name)
 JURISDICTION_REGISTRY = [
-    ("uk",          sync_uk_feed,               "UK"),
-    ("us",          sync_us_regulations,         "US"),
-    ("eu",          sync_eu_regulations,         "EU"),
-    ("india",       sync_india_regulations,      "India"),
+    ("uk",          sync_uk_feed,               "United Kingdom"),
+    ("us",          sync_us_regulations,         "United States (Federal)"),
+    ("eu",          sync_eu_regulations,         "European Union"),
+    ("india",       sync_india_regulations,      "India (Bharat)"),
     ("australia",   sync_australia_regulations,  "Australia"),
     ("canada",      sync_canada_regulations,     "Canada"),
     ("germany",     sync_germany_regulations,    "Germany"),

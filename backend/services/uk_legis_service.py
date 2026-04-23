@@ -95,7 +95,7 @@ async def sync_uk_feed(db: AsyncSession, limit: int = 10):
                     text=full_text or title,
                     source="UK Legislation API",
                     category=category,
-                    jurisdiction="UK"
+                    jurisdiction="United Kingdom"
                 )
                 
                 # Run impact analysis against internal policies

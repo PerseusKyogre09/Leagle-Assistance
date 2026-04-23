@@ -63,7 +63,7 @@ async def _sync_singapore_gazette(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="Singapore Statutes Online",
                     category=category,
-                    jurisdiction="SG",
+                    jurisdiction="Singapore",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -96,7 +96,7 @@ async def _sync_singapore_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (Singapore).\nFull coverage: {link}",
                     source="Singapore Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="SG",
+                    jurisdiction="Singapore",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

@@ -8,73 +8,76 @@ from core.utils import get_random_user_agent
 
 logger = logging.getLogger(__name__)
 
-# National People's Congress legislation portal
+# State Council Policies portal (English) - Official PRC Statutory Feed
+CHINA_STATE_COUNCIL_URL = "https://english.www.gov.cn/policies/latest"
 CHINA_NEWS_EN_RSS = "https://news.google.com/rss/search?q=China+regulation+SAMR+PIPL+CSRC+PBOC+law&hl=en-CN&gl=CN&ceid=CN:en"
-# China Law Translate covers major PRC regulations in English
-CHINA_CLT_RSS = "https://www.chinalawtranslate.com/feed/"
 
 async def sync_china_regulations(db: AsyncSession, limit: int = 10) -> int:
-    """Coordinates Chinese regulatory sync from China Law Translate and news alerts."""
+    """Coordinates Chinese regulatory sync from official State Council portal and news alerts."""
     count = 0
-    count += await _sync_china_clt(db, limit)
+    count += await _sync_china_state_council(db, limit)
     count += await _sync_china_news(db, limit // 2)
     return count
 
-async def _sync_china_clt(db: AsyncSession, limit: int = 10) -> int:
-    """Fetches PRC regulatory translations from China Law Translate RSS."""
-    logger.info("🇨🇳 Syncing China: China Law Translate RSS")
+async def _sync_china_state_council(db: AsyncSession, limit: int = 10) -> int:
+    """Scrapes official PRC policies from the State Council English portal."""
+    logger.info("🇨🇳 Syncing China: State Council Official Portal")
     headers = {"User-Agent": get_random_user_agent()}
 
     async with httpx.AsyncClient(headers=headers, follow_redirects=True, timeout=30.0) as client:
         try:
-            response = await client.get(CHINA_CLT_RSS)
+            response = await client.get(CHINA_STATE_COUNCIL_URL)
             response.raise_for_status()
-            soup = BeautifulSoup(response.content, "xml")
+            soup = BeautifulSoup(response.content, "html.parser")
         except Exception as e:
-            logger.error(f"❌ China Law Translate RSS Failure: {e}")
+            logger.error(f"❌ China State Council Portal Failure: {e}")
             return 0
 
-        items = soup.find_all("item")
-        print(f"📡 Found {len(items)} items in China Law Translate RSS.")
+        # Official policy list items
+        # The portal uses a list of items within the policy section
+        items = soup.select(".list-item, .list li, .latest-policies li")
+        if not items:
+            # Fallback to general link search
+            items = [a for a in soup.find_all("a", href=True) if "/latest/" in a.get("href")]
+
+        print(f"📡 Found {len(items)} items in China State Council portal.")
         count = 0
-        for item in items[:limit]:
-            title = item.find("title").text if item.find("title") else "Unknown Chinese Regulation"
-            link = item.find("link").text if item.find("link") else ""
-            description = item.find("description").text if item.find("description") else title
-
-            # Strip HTML from description
+        unique_titles = set()
+        
+        for item in items:
+            if count >= limit: break
             try:
-                description = BeautifulSoup(description, "html.parser").get_text()
-            except Exception:
-                pass
+                title = item.get_text().strip()
+                link = item.get("href", "") if hasattr(item, "get") else ""
+                
+                if not title or len(title) < 10 or title in unique_titles: continue
+                unique_titles.add(title)
+                
+                if not link.startswith("http"):
+                    link = f"https://english.www.gov.cn{link}"
 
-            category = "compliance"
-            lower = (title + description).lower()
-            if "personal information" in lower or "pipl" in lower or "data" in lower or "privacy" in lower:
-                category = "data_privacy"
-            elif "financial" in lower or "csrc" in lower or "pboc" in lower or "banking" in lower:
-                category = "financial"
-            elif "environment" in lower or "carbon" in lower or "climate" in lower:
-                category = "environmental"
-            elif "health" in lower or "medical" in lower or "drug" in lower:
-                category = "healthcare"
-            elif "cybersecurity" in lower or "network" in lower or "security" in lower:
-                category = "security"
+                category = "compliance"
+                lower = title.lower()
+                if any(x in lower for x in ["data", "privacy", "information", "pipl"]):
+                    category = "data_privacy"
+                elif any(x in lower for x in ["financial", "banking", "monetary", "csrc", "pboc"]):
+                    category = "financial"
+                elif any(x in lower for x in ["environment", "carbon", "climate"]):
+                    category = "environmental"
 
-            print(f"📥 Syncing China: {title[:60]}... ({category})")
-            try:
+                print(f"📥 Syncing China (Official): {title[:60]}... ({category})")
                 regulation = await ingest_regulation(
                     db=db,
                     title=title,
-                    text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
-                    source="China Law Translate",
+                    text=f"Official Policy from the State Council of the People's Republic of China.\nSource URL: {link}",
+                    source="State Council of China (Official)",
                     category=category,
-                    jurisdiction="CN",
+                    jurisdiction="China",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
             except Exception as e:
-                logger.error(f"❌ China CLT Ingest Error: {e}")
+                logger.debug(f"Skipping noise item in China sync: {e}")
         return count
 
 async def _sync_china_news(db: AsyncSession, limit: int = 5) -> int:
@@ -102,7 +105,7 @@ async def _sync_china_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (China).\nFull coverage: {link}",
                     source="China Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="CN",
+                    jurisdiction="China",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

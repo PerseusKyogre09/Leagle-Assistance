@@ -68,7 +68,7 @@ async def _sync_russia_garant(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="Garant Legal Portal (Russia)",
                     category=category,
-                    jurisdiction="RU",
+                    jurisdiction="Russia",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -101,7 +101,7 @@ async def _sync_russia_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (Russia).\nFull coverage: {link}",
                     source="Russia Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="RU",
+                    jurisdiction="Russia",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

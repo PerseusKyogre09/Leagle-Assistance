@@ -65,7 +65,7 @@ async def sync_eu_regulations(db: AsyncSession, limit: int = 10):
                     text=f"{title}\n\n{description}",
                     source="EUR-Lex RSS",
                     category=category,
-                    jurisdiction="EU",
+                    jurisdiction="European Union",
                     effective_date=None # Could parse pub_date
                 )
                 

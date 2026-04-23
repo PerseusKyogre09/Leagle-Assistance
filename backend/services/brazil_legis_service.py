@@ -66,7 +66,7 @@ async def _sync_brazil_dou(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="Diário Oficial da União (Brazil)",
                     category=category,
-                    jurisdiction="BR",
+                    jurisdiction="Brazil",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -99,7 +99,7 @@ async def _sync_brazil_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (Brazil).\nFull coverage: {link}",
                     source="Brazil Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="BR",
+                    jurisdiction="Brazil",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1

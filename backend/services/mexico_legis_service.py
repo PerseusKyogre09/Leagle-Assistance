@@ -65,7 +65,7 @@ async def _sync_mexico_dof(db: AsyncSession, limit: int = 10) -> int:
                     text=f"{title}\n\n{description[:1000]}\n\nSource: {link}",
                     source="Diario Oficial de la Federación (Mexico)",
                     category=category,
-                    jurisdiction="MX",
+                    jurisdiction="Mexico",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
@@ -98,7 +98,7 @@ async def _sync_mexico_news(db: AsyncSession, limit: int = 5) -> int:
                     text=f"Regulatory Intelligence Alert (Mexico).\nFull coverage: {link}",
                     source="Mexico Regulatory News Alerts",
                     category="compliance",
-                    jurisdiction="MX",
+                    jurisdiction="Mexico",
                 )
                 await run_impact_analysis(db, regulation)
                 count += 1
