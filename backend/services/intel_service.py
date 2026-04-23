@@ -55,7 +55,7 @@ class RegulationIntelligenceService:
         similar_regs = semantic_search(
             query_text=text[:1500], 
             top_k=50, 
-            score_threshold=0.15, # Slightly lower threshold for diversity
+            score_threshold=0.35, # Increased threshold to ensure strictly relevant cross-references
             source_type_filter="regulation"
         )
         
