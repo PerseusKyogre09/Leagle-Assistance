@@ -1,3 +1,12 @@
+---
+title: Leagle Assistance
+emoji: ⚖️
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # AI Compliance Management System
 
 **Built by Team Hustlers**
