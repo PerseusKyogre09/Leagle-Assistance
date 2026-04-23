@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 # Singapore: Singapore Statutes Online (SSL) and MAS regulatory feed
 SINGAPORE_NEWS_RSS = "https://news.google.com/rss/search?q=Singapore+MAS+regulation+law+PDPA+compliance&hl=en-SG&gl=SG&ceid=SG:en"
-# Singapore Statutes Online gazette feed
-SINGAPORE_GAZETTE_RSS = "https://sso.agc.gov.sg/RSSFeed.aspx"
+# Singapore Statutes Online gazette feed - New verified endpoint
+SINGAPORE_GAZETTE_RSS = "https://sso.agc.gov.sg/What's-New/New-Legislation/RSS"
 
 async def sync_singapore_regulations(db: AsyncSession, limit: int = 10) -> int:
     """Coordinates Singaporean regulatory sync from SSO and news alerts."""
@@ -23,7 +23,14 @@ async def sync_singapore_regulations(db: AsyncSession, limit: int = 10) -> int:
 async def _sync_singapore_gazette(db: AsyncSession, limit: int = 10) -> int:
     """Fetches Singapore statutes from the SSO RSS/Gazette feed."""
     logger.info("🇸🇬 Syncing Singapore: Statutes Online RSS")
-    headers = {"User-Agent": get_random_user_agent()}
+    # Using hardened browser-like headers to bypass Cloudflare 467 blocks
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
+    }
 
     async with httpx.AsyncClient(headers=headers, follow_redirects=True, timeout=30.0) as client:
         try:

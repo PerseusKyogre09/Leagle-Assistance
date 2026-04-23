@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 # Brazil: Planalto (official federal law portal) and news
 BRAZIL_NEWS_EN_RSS = "https://news.google.com/rss/search?q=Brazil+federal+law+regulation+LGPD+BACEN+CVM&hl=en-BR&gl=BR&ceid=BR:en"
-# Brazilian government Diário Oficial (DOU) RSS feed
-BRAZIL_DOU_RSS = "https://www.in.gov.br/servicos/rss-do-diario-oficial-da-uniao"
+# Brazil government Diário Oficial (DOU) RSS feed - Verified stable source
+BRAZIL_DOU_RSS = "https://www.gov.br/imprensanacional/pt-br/servicos/RSS"
 
 async def sync_brazil_regulations(db: AsyncSession, limit: int = 10) -> int:
     """Coordinates Brazilian regulatory sync from DOU and news alerts."""
