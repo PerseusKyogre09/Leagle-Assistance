@@ -15,9 +15,9 @@ Analyze the provided regulation and provide a hard-hitting intelligence report.
 
 AUTHENTICITY RULES:
 1. **Explicit Jurisdiction**: State exactly where this regulation is from (mention Country/Region).
-2. **Real Comparisons**: Use the 'CROSS-JURISDICTIONAL CONTEXT' provided to draw specific parallels. 
-   - If Article 5 of GDPR is mentioned, compare it directly.
-   - If no specific legal parallels are found in context, focus on the operational impact for multinational companies.
+2. **Real Comparisons**: Use the 'CROSS-JURISDICTIONAL CONTEXT' provided to draw specific parallels with diverse global standards.
+   - Contrast with at least two different jurisdictions if available in context.
+   - If no specific legal parallels are found, focus on the operational impact for multinational companies.
 3. **No Fluff**: Do not say "it may relate to." Say "This aligns with..." or "This differs from..."
 4. **Impact Areas**: Identify exactly which departments (e.g., Legal, IT, HR, Finance) are affected.
 """),
@@ -49,25 +49,38 @@ class RegulationIntelligenceService:
         """Generates structured intelligence for a regulation."""
         risk_score = risk_scorer.predict(text)
         
-        # Perform cross-jurisdictional search
-        # Search for similar things in OTHER jurisdictions
+        # Perform cross-jurisdictional search with diversity weighting
+        # We fetch a larger pool (top 50) and then pick representative examples 
+        # from various jurisdictions to ensure the LLM sees a global spectrum.
         similar_regs = semantic_search(
-            query_text=text[:1000], 
-            top_k=5, 
-            score_threshold=0.2,
+            query_text=text[:1500], 
+            top_k=50, 
+            score_threshold=0.15, # Slightly lower threshold for diversity
             source_type_filter="regulation"
         )
         
-        # Filter to prioritize other jurisdictions
-        other_juris_context = []
+        # Diversity Filter: Pick the top record from each jurisdiction
+        jurisdiction_map: Dict[str, Dict] = {}
         for reg in similar_regs:
-            reg_juris = reg.get("jurisdiction", "Unknown")
-            if reg_juris.lower() != jurisdiction.lower():
-                other_juris_context.append(
-                    f"Source: {reg.get('title')} ({reg_juris})\nContent: {reg.get('text')[:300]}"
-                )
+            reg_juris = reg.get("jurisdiction", "Global")
+            
+            # Skip the country we are already analyzing to ensure cross-jurisdictional context
+            if jurisdiction and reg_juris.lower() == jurisdiction.lower():
+                continue 
+            
+            if reg_juris not in jurisdiction_map:
+                jurisdiction_map[reg_juris] = reg
+            
+            if len(jurisdiction_map) >= 10: # Limit to top 10 distinct countries for contextual richness
+                break
         
-        context_str = "\n---\n".join(other_juris_context) or "No direct jurisdictional parallels found in local database."
+        other_juris_context = []
+        for reg_juris, reg in jurisdiction_map.items():
+            other_juris_context.append(
+                f"REGION: {reg_juris}\nREGULATION: {reg.get('title')}\nPRELUDE: {reg.get('text')[:350]}..."
+            )
+        
+        context_str = "\n\n---\n\n".join(other_juris_context) or "No diverse jurisdictional parallels found in local database."
         
         try:
             try:

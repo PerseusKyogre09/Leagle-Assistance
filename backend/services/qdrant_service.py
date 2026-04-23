@@ -265,6 +265,7 @@ def semantic_search(
             "regulation_id": hit.payload.get("regulation_id", ""),
             "policy_id": hit.payload.get("policy_id", ""),
             "source_type": hit.payload.get("source_type", ""),
+            "jurisdiction": hit.payload.get("jurisdiction", "Global"),
             "storage_path": hit.payload.get("storage_path"),
         }
         for hit in results
