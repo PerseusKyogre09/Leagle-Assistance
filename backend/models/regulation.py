@@ -21,6 +21,8 @@ class Regulation(Base):
     raw_text: Mapped[str] = mapped_column(Text, nullable=True)
     qdrant_ids: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True)  # Vector chunk IDs in Qdrant
     risk_level: Mapped[int] = mapped_column(SmallInteger, default=0)  # 0-100 scale
+    penalty_description: Mapped[str] = mapped_column(Text, nullable=True)  # e.g., "Fine: 4% global turnover"
+    legal_weight: Mapped[int] = mapped_column(SmallInteger, default=5)  # 1-10 scale (Constitutional=10, Law=7, Reg=3)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
     # Relationships
