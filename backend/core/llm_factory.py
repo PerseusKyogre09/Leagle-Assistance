@@ -29,15 +29,14 @@ class LLMFactory:
     @staticmethod
     def get_llm(provider: str = None, temperature: float = 0.0, max_tokens: Optional[int] = None) -> BaseChatModel:
         """
-        Creates an LLM instance for a specific provider.
+        Creates an LLM instance for a specific provider with automatic fallback.
         """
         target_provider = provider or settings.llm_provider
         
         if target_provider == "groq":
             if not LLMFactory.is_key_valid(settings.groq_api_key):
-                # If Groq is missing, fall back to whatever is next or raise a clear error
-                logger.error("❌ Groq API Key is missing or invalid. Check your environment variables.")
-                raise ValueError("Groq API Key not configured. Please add GROQ_API_KEY to your environment.")
+                logger.error("❌ Groq API Key is missing or invalid.")
+                raise ValueError("Groq API Key not configured.")
             
             return ChatGroq(
                 model_name="llama-3.3-70b-versatile",
@@ -55,42 +54,42 @@ class LLMFactory:
                 max_tokens=max_tokens,
             )
 
-        # Default to Gemini
+        # Default: Gemini with Groq Fallback
         if not LLMFactory.is_key_valid(settings.gemini_api_key):
              logger.error("❌ Gemini API Key is missing or invalid.")
-             # If we have Groq, we could try falling back here, but usually, 
-             # the caller wants a specific provider if they called get_llm(provider=...)
              if target_provider == "gemini":
                  raise ValueError("Gemini API Key not configured.")
         
-        return ChatGoogleGenerativeAI(
+        gemini = ChatGoogleGenerativeAI(
             model=settings.llm_model,
             google_api_key=settings.gemini_api_key,
             temperature=temperature,
             max_tokens=max_tokens,
-            # Suppress internal retries to allow our manual fallback to trigger faster
             max_retries=0, 
         )
 
+        # Attach Groq as fallback if available
+        if LLMFactory.is_key_valid(settings.groq_api_key):
+            groq_fallback = ChatGroq(
+                model_name="llama-3.3-70b-versatile",
+                groq_api_key=settings.groq_api_key,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return gemini.with_fallbacks([groq_fallback])
+        
+        return gemini
+
     @staticmethod
-    async def invoke_with_fallback(chain: Any, input_data: dict, primary_provider: str = "gemini") -> str:
+    async def invoke_with_fallback(chain: Any, input_data: dict) -> Any:
         """
-        Invokes a chain with automatic fallback if the primary provider fails due to quota.
+        Generic wrapper to catch quota errors and provide better logging,
+        even though with_fallbacks handles the actual swap.
         """
         try:
-            # Attempt primary
             return await chain.ainvoke(input_data)
         except Exception as e:
             error_str = str(e).lower()
             if "429" in error_str or "quota" in error_str or "resource_exhausted" in error_str:
-                logger.warning(f"⚠️ {primary_provider.upper()} Quota Exhausted. Falling back to GROQ...")
-                
-                # Re-bind the chain with Groq
-                fallback_llm = LLMFactory.get_llm(provider="groq")
-                
-                # Extract the prompt from the chain and re-invoke
-                # Note: This assumes the chain is (Prompt | LLM | OutputParser)
-                # We can't easily "swap" the LLM inside a compiled chain easily without re-creating it,
-                # so we rely on the caller to handle the chain creation or we provide a more robust wrapper.
-                raise e # For now, let's let the service handle the swap until we refine this.
+                logger.error(f"❌ ALL LLM providers exhausted quota: {str(e)}")
             raise e

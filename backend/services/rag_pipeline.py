@@ -124,30 +124,18 @@ async def analyze_impact(
         context = "Analyze the primary texts provided below."
 
     try:
-        try:
-            llm = _get_llm(temperature=0.1, max_tokens=1000) # Increased capacity for detail
-            chain = IMPACT_ANALYSIS_PROMPT | llm | StrOutputParser()
-            raw_response = await chain.ainvoke({
+        llm = _get_llm(temperature=0.1, max_tokens=1000) 
+        chain = IMPACT_ANALYSIS_PROMPT | llm | StrOutputParser()
+        
+        # LLMFactory now handles fallback internally via with_fallbacks
+        raw_response = await LLMFactory.invoke_with_fallback(
+            chain, 
+            {
                 "context": context,
-                "regulation_text": f"{regulation_title}\n\n{regulation_text}"[:5000], # Increased
-                "policy_text": f"{policy_title}\n\n{policy_text}"[:6000], # Increased
-            })
-        except Exception as e:
-            gemini_quota = "429" in str(e) or "quota" in str(e).lower() or "resource_exhausted" in str(e).lower()
-            if gemini_quota and LLMFactory.is_key_valid(settings.groq_api_key):
-                logger.warning(f"⚠️ Gemini Quota Exceeded. Falling back to Groq for Impact Analysis...")
-                fallback_llm = LLMFactory.get_llm(provider="groq", temperature=0.1)
-                chain = IMPACT_ANALYSIS_PROMPT | fallback_llm | StrOutputParser()
-                raw_response = await chain.ainvoke({
-                    "context": context,
-                    "regulation_text": f"{regulation_title}\n\n{regulation_text}"[:3000],
-                    "policy_text": f"{policy_title}\n\n{policy_text}"[:2000],
-                })
-            elif gemini_quota:
-                logger.error("❌ Gemini Quota Exceeded and no valid Groq fallback found.")
-                raise RuntimeError("AI Quota Exceeded for Analysis.")
-            else:
-                raise e
+                "regulation_text": f"{regulation_title}\n\n{regulation_text}"[:5000], 
+                "policy_text": f"{policy_title}\n\n{policy_text}"[:6000], 
+            }
+        )
 
         clean = raw_response.strip()
         if clean.startswith("```"):
@@ -188,11 +176,14 @@ async def rag_question_answer(question: str) -> dict:
     llm = _get_llm()
     chain = SEMANTIC_SEARCH_PROMPT | llm | StrOutputParser()
 
-    # Pass local risk to LLM for awareness
-    answer = await chain.ainvoke({
-        "context": context, 
-        "question": f"{question} (Internal ML Signal: {local_risk})"
-    })
+    # LLMFactory.get_llm() returns an LLM with automatic fallback to Groq
+    answer = await LLMFactory.invoke_with_fallback(
+        chain,
+        {
+            "context": context, 
+            "question": f"{question} (Internal ML Signal: {local_risk})"
+        }
+    )
 
     return {
         "answer": answer,
