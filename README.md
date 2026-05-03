@@ -1,53 +1,40 @@
----
-title: Leagle Assistance
-emoji: ⚖️
-colorFrom: indigo
-colorTo: blue
-sdk: docker
-pinned: false
----
+# Leagle
 
-# AI Compliance Management System
+**AI compliance intelligence system**
 
-**Built by Team Hustlers**
-
-A regulatory intelligence platform that uses vector search and LLM-powered analysis to help organizations stay compliant — automatically.
+Leagle combines semantic search, document ingestion, and LLM-powered regulatory impact analysis to help organizations stay audit-ready, reduce manual review overhead, and accelerate policy alignment across regulations and internal controls.
 
 ---
 
 ## The Problem
 
-Compliance teams are drowning. New regulations drop every week, each one buried in dense legal language. Someone has to read it, figure out which internal policies it affects, and decide what to change. Multiply that across GDPR, DPDP Act, PCI-DSS, SOC 2, and a dozen other frameworks, and you've got a full-time job that nobody wants.
+New regulations appear constantly across privacy, security, finance, and industry-specific frameworks. Manual review is slow, fragmented, and prone to missing cross-policy dependencies.
 
-Most existing tools don't help much either — they rely on keyword matching, which misses context entirely. Searching for "data retention" won't surface a policy that talks about "record keeping timelines" even though they mean the same thing.
-
-We wanted to fix that.
+Many tools still rely on keyword matching, which fails to connect legal intent across phrasing like "data retention" and "record keeping timelines." Leagle solves this by understanding compliance meaning through embeddings and contextual analysis.
 
 ---
 
-## What We Built
+## What Leagle Does
 
-An end-to-end compliance management platform with three core capabilities:
+### 1. Semantic Search for Regulations and Policies
 
-### 1. Semantic Search over Regulations
+Regulations, policies, and legal documents are converted into vector embeddings and stored in **Qdrant**. Natural language queries return the most relevant content by meaning, not just keyword overlap.
 
-We use **Sentence Transformers** (`all-MiniLM-L6-v2`) to convert every regulation and policy into vector embeddings, stored in **Qdrant**. When you search for something like _"breach notification deadline"_, the system finds relevant documents by meaning — not just matching words.
+### 2. Automated Policy and Regulation Ingestion
 
-The search results feed into a **RAG pipeline** (Retrieval-Augmented Generation) that uses an LLM to synthesize a compliance verdict with legal citations, risk scores, and remediation steps.
+Leagle ingests content from PDFs, manual uploads, and external feeds. It can process policy PDFs directly and sync official legislative sources across multiple jurisdictions.
 
-### 2. Automated Impact Analysis
+### 3. Retrieval-Augmented Impact Analysis
 
-Upload a new regulation, and the system will:
-- Find every internal policy it might affect
-- Use an LLM to generate a structured impact report (affected clauses, compliance gaps, recommended actions, deadlines)
-- Score the risk as HIGH, MEDIUM, or LOW
-- Trigger real-time alerts via WebSocket
+Leagle uses a RAG pipeline to analyze regulation-policy relationships with structured findings, compliance gaps, risk labels, and remediation guidance. This includes full regulation impact analysis and policy compliance checks.
 
-This turns a process that takes days of manual review into something that happens in seconds.
+### 4. Advanced Risk Visualization
 
-### 3. Risk Heatmap & Dashboard
+A new dual-mode heatmap experience combines an interactive departmental risk matrix with a global 2D/3D hotspot map. Users can drill into categories, view jurisdiction-specific risk clusters, and explore live risk signals across countries.
 
-A visual risk matrix that maps **departments × compliance categories**, color-coded by severity. Click any cell to drill down into the specific impact events, source regulations, and recommended actions. The dashboard gives a bird's-eye view of your compliance posture at a glance.
+### 5. Real-Time Alerts and Monitoring
+
+The system emits alerts for new high-risk findings and provides a WebSocket stream for live updates, enabling compliance teams to stay informed without polling the backend.
 
 ---
 
@@ -65,34 +52,35 @@ A visual risk matrix that maps **departments × compliance categories**, color-c
               ┌─────▼─────┐  ┌─────▼─────┐
               │ PostgreSQL │  │   Redis   │
               │  (Models)  │  │  (Cache)  │
-              └───────────┘  └───────────┘
+              └───────────┘  └────────────┘
 ```
 
-**Backend** — FastAPI with async SQLAlchemy, Socket.IO for real-time alerts, LangChain for the RAG pipeline.
+**Backend** — FastAPI with async SQLAlchemy, Socket.IO for real-time alerts, and LangChain for RAG.
 
-**Vector DB** — Qdrant stores chunked regulation/policy embeddings. Semantic search with configurable score thresholds.
+**Vector DB** — Qdrant stores chunked embedding vectors for regulations and policies.
 
-**LLM Layer** — Pluggable provider system (Gemini, Groq/Llama 3.3, OpenAI). The RAG pipeline retrieves relevant chunks from Qdrant, injects them as context, and the LLM generates structured analysis.
+**LLM Layer** — Flexible provider configuration supports Gemini, Groq, and OpenAI.
 
-**Risk Scoring** — Hybrid approach: a rule-based keyword density scorer runs locally (no API call needed), with an optional trained sklearn model that takes over when available.
+**Risk Scoring** — Hybrid local scoring augmented by optional ML models.
 
-**Frontend** — Next.js 16 with React 19, Tailwind CSS, dark-themed glassmorphism UI with real-time Socket.IO integration.
+**Frontend** — Next.js 16, React 19, Tailwind CSS, Zustand, React Query, and Socket.IO.
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Semantic Search** | Natural language queries over regulations and policies using vector similarity |
-| **RAG Q&A** | LLM-generated compliance verdicts with cited sources and confidence scores |
-| **Impact Analysis** | Automated detection of which policies a new regulation affects |
-| **Risk Scoring** | Hybrid ML + rule-based scoring (HIGH / MEDIUM / LOW) |
-| **Risk Heatmap** | Department × Category matrix with drill-down detail modals |
-| **Real-Time Alerts** | WebSocket-based live alert feed when new risks are detected |
-| **Document Ingestion** | Upload and embed regulations, policies, and legal documents |
-| **Executive Dashboard** | System metrics, alert counts, and quick actions in one view |
-| **Multi-LLM Support** | Switch between Gemini, Groq (Llama 3.3 70B), or OpenAI |
+- Semantic search across regulations, policies, and legal documents
+- Retrieval-augmented compliance Q&A with source citations
+- Full RAG impact analysis between regulations and policies
+- Automated policy compliance checks and impact mapping
+- PDF ingestion pipeline with text extraction, chunking, embedding, and indexing
+- Dual-mode risk visualization: departmental matrix + global 2D/3D hotspot map
+- Real-time alerts via WebSockets and alert acknowledgment
+- Multi-jurisdiction sync across 17+ country-specific legislative feeds
+- Hybrid risk scoring with dynamic risk intensity and heatmap mapping
+- Secure public API support with institutional neural retrieval endpoints
+- Continuous dataset seeding and regulatory feed automation
+- Support for Gemini, Groq, and OpenAI LLM providers
 
 ---
 
@@ -110,6 +98,56 @@ A visual risk matrix that maps **departments × compliance categories**, color-c
 
 ---
 
+## Data and Auto-Update
+
+Leagle ships with a broad set of seed datasets and an automated ingestion pipeline:
+
+- `backend/scripts/seed_datasets.py` populates Qdrant with SEC Form 10-K content, GDPR and DPDP regulatory benchmarks, LexGLUE legal reference data, GDPR case samples, and custom regulatory training data.
+- `backend/scripts/seed_demo_data.py` provides a quick demo seed with sample regulations and internal policies for local testing.
+- `backend/scripts/seed_large_dataset.py` ingests larger legal datasets and can be used to expand the vector store from curated sources.
+- `backend/scripts/seed_compliance_engine.py` builds the compliance engine from policies and regulations and triggers auto-impact data generation.
+- `backend/scripts/seed_uk_manual.py` loads UK legislative samples and manual sync content.
+
+The backend also includes sync and maintenance utilities that help keep the vector store aligned with incoming data:
+
+- `backend/services/sync_manager.py` coordinates global synchronization across jurisdiction-specific legislative services.
+- `backend/scripts/verify_syncs.py` validates jurisdictional sync services and ingests new regulations from supported feeds.
+- `backend/scripts/migrate_qdrant.py` migrates and refreshes Qdrant points when the schema or collection needs updating.
+
+Leagle tracks jurisdiction metadata for all documents so that regulations can be searched, analyzed, and deduplicated by country or region. Its Qdrant index stores `jurisdiction` payloads and the ingestion pipeline avoids semantic duplicate detection across different countries.
+
+### Supported Jurisdictions
+
+Leagle currently supports sync services for:
+
+- United Kingdom
+- United States (Federal)
+- European Union
+- India
+- Australia
+- Canada
+- Germany
+- France
+- Japan
+- China
+- Russia
+- Brazil
+- Singapore
+- South Korea
+- Mexico
+- South Africa
+- UAE
+
+### Auto-Update Workflow
+
+1. New regulation documents are ingested through the API or sync services.
+2. Jurisdiction-specific legislative services fetch official feeds and news sources for supported countries.
+3. The ingestion pipeline chunks text, generates embeddings, and upserts vectors into Qdrant with jurisdiction metadata.
+4. Policy impact analysis and heatmap data are updated automatically for newly ingested content.
+5. Verification scripts such as `verify_syncs.py` can be run periodically to confirm fresh regulation syncs and keep the dataset current.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -121,8 +159,8 @@ A visual risk matrix that maps **departments × compliance categories**, color-c
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/Anushkamahajan6/Hustlers.git
-cd Hustlers
+git clone https://github.com/your-username/Leagle.git
+cd Leagle
 ```
 
 Create a `.env` file in the project root:
@@ -133,7 +171,7 @@ QDRANT_HOST=127.0.0.1
 QDRANT_PORT=6333
 REDIS_URL=redis://127.0.0.1:6379/0
 
-# Pick one LLM provider and add its key
+# Choose an LLM provider and add its key
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=your-key-here
 # Or use Groq:
@@ -147,7 +185,7 @@ GEMINI_API_KEY=your-key-here
 docker compose up -d
 ```
 
-This spins up PostgreSQL, Qdrant, and Redis. Wait until all containers are healthy:
+Wait for PostgreSQL, Qdrant, and Redis to become healthy:
 
 ```bash
 docker ps
@@ -158,12 +196,11 @@ docker ps
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Mac/Linux
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Seed the vector database with demo regulations:
+Seed the vector database with demo content:
 
 ```bash
 python scripts/seed_demo_data.py
@@ -190,7 +227,7 @@ Open **http://localhost:3001** in your browser.
 ## Project Structure
 
 ```
-Hustlers/
+Leagle/
 ├── backend/
 │   ├── core/              # Config, database connection
 │   ├── models/            # SQLAlchemy models (Regulation, Policy, Impact, Alert)
@@ -237,15 +274,15 @@ Hustlers/
 
 ## How Impact Analysis Works
 
-This is the core intelligence of the system. When a new regulation is ingested:
+When a new regulation is ingested:
 
-1. **Chunking** — The regulation text is split into overlapping chunks
-2. **Embedding** — Each chunk is converted to a 384-dimensional vector using `all-MiniLM-L6-v2`
-3. **Storage** — Vectors are upserted into Qdrant with metadata (source, category, jurisdiction)
-4. **Retrieval** — When analyzing impact, the system retrieves the top-k most similar chunks from Qdrant
-5. **Analysis** — Retrieved context + regulation + policy are sent to the LLM with a structured prompt
-6. **Scoring** — The hybrid risk scorer runs locally to produce a risk level
-7. **Alerting** — If risk exceeds threshold, a real-time alert is broadcast via WebSocket
+1. **Chunking** — The regulation text is split into smaller content chunks.
+2. **Embedding** — Each chunk is converted to a vector using `all-MiniLM-L6-v2`.
+3. **Storage** — Vectors are upserted into Qdrant with metadata like source, category, and jurisdiction.
+4. **Retrieval** — The system retrieves the most relevant chunks for analysis.
+5. **Analysis** — Retrieved context, regulation, and policy text are sent to the LLM with a prompt.
+6. **Scoring** — The hybrid risk scorer produces a risk level.
+7. **Alerting** — High-risk findings can generate real-time alerts.
 
 The LLM returns structured JSON with impact level, affected clauses, compliance gaps, recommended actions, and deadlines.
 
@@ -253,20 +290,22 @@ The LLM returns structured JSON with impact level, affected clauses, compliance 
 
 ## Seeded Data
 
-The demo dataset includes regulations from:
+Demo and production datasets include:
 
-- **GDPR** — Articles 5, 32, 33 (EU data privacy)
-- **India DPDP Act** — Data principal rights (India)
-- **SOC 2 Type II** — Security and compliance controls (US)
-- **PCI-DSS v3.2.1** — Payment card data security (Global)
-
-Plus three sample company policies (Data Retention, Access Control, Incident Response) for testing impact analysis.
+- **GDPR** — Article 5, 32, 33 and related EU privacy controls
+- **India DPDP Act** — Data principal rights and compliance requirements
+- **PCI-DSS v3.2.1** — Payment card data security controls
+- **SOC 2 Type II** — Security and compliance controls for service organizations
+- **SEC Form 10-K content** — Corporate compliance benchmark material
+- **LexGLUE and legal case datasets** — Regulatory reference and training content for risk scoring
+- Internal policy examples for Data Retention, Access Control, and Incident Response
+- Curated regulation-to-policy mapping datasets
 
 ---
 
-## Team
+## About This Project
 
-Built by **Team Hustlers** — a group of three engineers who believe compliance shouldn't require a law degree.
+Leagle is a compliance intelligence engine designed for practical regulatory analysis and rapid adaptation. It helps teams connect regulations to policy controls, surface risks, and deliver actionable remediation guidance more quickly.
 
 ---
 
@@ -276,10 +315,10 @@ This system is a decision-support tool. It is not a substitute for qualified leg
 
 ---
 
-## What's Next
+## What’s Next
 
-- Live regulatory feed scraping (auto-ingest new regulations as they're published)
-- Multi-language embedding support for cross-jurisdiction analysis
+- Live regulatory feed ingestion and auto-update pipelines
+- Multi-language embedding support
 - Fine-tuned risk classification model trained on labeled compliance data
-- Audit trail and compliance certification workflow
+- Audit trail and certification workflow
 - Role-based access control for enterprise teams
