@@ -62,6 +62,15 @@ You are already connected to a Qdrant cluster in the current dev environment.
 1.  Use your existing `QDRANT_URL` and `QDRANT_API_KEY`.
 2.  Ensure the `regulations_v1` collection is persistent.
 
+### GitHub Actions Keep-Alive
+If your Hugging Face Space or Qdrant cluster is on a free or idle-sensitive tier, add these repository secrets and keep the scheduled workflow enabled:
+
+* `HF_BACKEND_URL` - your Hugging Face backend URL, for example `https://your-space.hf.space`
+* `QDRANT_URL` - your Qdrant Cloud base URL
+* `QDRANT_API_KEY` - your Qdrant API key, if the cluster requires one
+
+The workflow runs every 10 minutes and calls the backend `/health` endpoint plus Qdrant `/readyz` so both services stay warm.
+
 ---
 
 ## Summary of URL Configuration
